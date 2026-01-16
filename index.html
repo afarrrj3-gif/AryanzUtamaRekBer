@@ -1,23 +1,197 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Test GAS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MC AryanzUtama</title>
+
+<style>
+:root{
+  --blue:#4fa3d1;
+  --light:#f5fbff;
+}
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--light);
+}
+.hidden{display:none}
+
+/* LOGIN */
+#login{
+  max-width:400px;
+  margin:80px auto;
+  background:white;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,.1);
+}
+#login h2{text-align:center;color:var(--blue)}
+#login input, #login select{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+#login button{
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  border:none;
+  border-radius:25px;
+  background:var(--blue);
+  color:white;
+  font-size:16px;
+}
+
+/* ROOM */
+#room{
+  max-width:700px;
+  margin:20px auto;
+  background:white;
+  border-radius:15px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.1);
+}
+.header{
+  background:var(--blue);
+  color:white;
+  padding:15px;
+}
+.status{font-size:13px;opacity:.9}
+
+/* CHAT */
+#chat{
+  padding:15px;
+  height:300px;
+  overflow-y:auto;
+}
+.msg{
+  margin-bottom:10px;
+}
+.msg b{color:var(--blue)}
+
+/* INPUT */
+.input{
+  display:flex;
+  gap:5px;
+  padding:10px;
+  border-top:1px solid #eee;
+}
+.input input{
+  flex:1;
+  padding:10px;
+  border-radius:20px;
+  border:1px solid #ccc;
+}
+.input button{
+  padding:10px 15px;
+  border:none;
+  border-radius:20px;
+  background:var(--blue);
+  color:white;
+}
+
+/* ADMIN */
+#adminPanel{
+  padding:10px;
+  display:flex;
+  gap:10px;
+}
+#adminPanel button{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:20px;
+  background:#ff5c5c;
+  color:white;
+}
+</style>
 </head>
+
 <body>
 
-<button onclick="testGAS()">TES GAS</button>
+<!-- LOGIN -->
+<div id="login">
+  <h2>MC AryanzUtama</h2>
+  <input id="name" placeholder="Nama">
+  <select id="role">
+    <option value="buyer">Buyer</option>
+    <option value="seller">Seller</option>
+    <option value="admin">Admin</option>
+  </select>
+  <input id="code" placeholder="Room Code">
+  <button onclick="masuk()">Masuk</button>
+</div>
+
+<!-- ROOM -->
+<div id="room" class="hidden">
+  <div class="header">
+    <div>Room Code: <span id="roomCode"></span></div>
+    <div class="status" id="status">MENUNGGU PEMBAYARAN</div>
+  </div>
+
+  <div id="chat"></div>
+
+  <div id="adminPanel" class="hidden">
+    <button onclick="paymentMasuk()">PAYMENT MASUK</button>
+    <button onclick="done()">DONE</button>
+  </div>
+
+  <div class="input">
+    <input id="message" placeholder="Tulis pesan...">
+    <button onclick="kirim()">Kirim</button>
+  </div>
+</div>
 
 <script>
-function testGAS() {
-  fetch("https://script.google.com/macros/s/AKfycbw53PMVZ4oNfIcGld4AclmqoVP_aeWbzSX7_-WBFK1bIttqQ2Y6GuJe2MG7_xW4KKtYjw/exec")
-    .then(response => response.text())
-    .then(data => {
-      alert("RESPON GAS:\n" + data);
-    })
-    .catch(error => {
-      alert("ERROR:\n" + error);
-    });
+let user = {};
+let messages = [];
+
+function masuk(){
+  user.name = name.value;
+  user.role = role.value;
+  user.code = code.value;
+
+  if(!user.name || !user.code){
+    alert("Lengkapi data");
+    return;
+  }
+
+  login.classList.add("hidden");
+  room.classList.remove("hidden");
+  roomCode.innerText = user.code;
+
+  if(user.role === "admin"){
+    adminPanel.classList.remove("hidden");
+  }
+
+  tambahPesan("SYSTEM",""+user.name+" masuk sebagai "+user.role);
+}
+
+function tambahPesan(nama, teks){
+  const div = document.createElement("div");
+  div.className="msg";
+  div.innerHTML = `<b>${nama}:</b> ${teks}`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function kirim(){
+  if(!message.value) return;
+  tambahPesan(user.name, message.value);
+  message.value="";
+}
+
+function paymentMasuk(){
+  status.innerText="PAYMENT MASUK";
+  tambahPesan("ADMIN","PAYMENT MASUKKK ✅ lanjut ajaa");
+}
+
+function done(){
+  tambahPesan("SYSTEM","MC DONE ✅");
+  status.innerText="DONE";
 }
 </script>
 
