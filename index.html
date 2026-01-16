@@ -1,197 +1,137 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MC AryanzUtama</title>
+  <meta charset="UTF-8">
+  <title>MC AryanzUtama</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f4cff, #6ecbff);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
 
-<style>
-:root{
-  --blue:#4fa3d1;
-  --light:#f5fbff;
-}
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:var(--light);
-}
-.hidden{display:none}
+    .card {
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+      padding: 25px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      animation: fadeIn 0.8s ease;
+    }
 
-/* LOGIN */
-#login{
-  max-width:400px;
-  margin:80px auto;
-  background:white;
-  padding:25px;
-  border-radius:15px;
-  box-shadow:0 10px 30px rgba(0,0,0,.1);
-}
-#login h2{text-align:center;color:var(--blue)}
-#login input, #login select{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-#login button{
-  width:100%;
-  margin-top:15px;
-  padding:12px;
-  border:none;
-  border-radius:25px;
-  background:var(--blue);
-  color:white;
-  font-size:16px;
-}
+    h1 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
 
-/* ROOM */
-#room{
-  max-width:700px;
-  margin:20px auto;
-  background:white;
-  border-radius:15px;
-  overflow:hidden;
-  box-shadow:0 10px 30px rgba(0,0,0,.1);
-}
-.header{
-  background:var(--blue);
-  color:white;
-  padding:15px;
-}
-.status{font-size:13px;opacity:.9}
+    p {
+      text-align: center;
+      font-size: 13px;
+      opacity: .9;
+      margin-bottom: 20px;
+    }
 
-/* CHAT */
-#chat{
-  padding:15px;
-  height:300px;
-  overflow-y:auto;
-}
-.msg{
-  margin-bottom:10px;
-}
-.msg b{color:var(--blue)}
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+    }
 
-/* INPUT */
-.input{
-  display:flex;
-  gap:5px;
-  padding:10px;
-  border-top:1px solid #eee;
-}
-.input input{
-  flex:1;
-  padding:10px;
-  border-radius:20px;
-  border:1px solid #ccc;
-}
-.input button{
-  padding:10px 15px;
-  border:none;
-  border-radius:20px;
-  background:var(--blue);
-  color:white;
-}
+    button {
+      background: #ffffff;
+      color: #0f4cff;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-/* ADMIN */
-#adminPanel{
-  padding:10px;
-  display:flex;
-  gap:10px;
-}
-#adminPanel button{
-  flex:1;
-  padding:10px;
-  border:none;
-  border-radius:20px;
-  background:#ff5c5c;
-  color:white;
-}
-</style>
+    button:hover {
+      opacity: .9;
+    }
+
+    .status {
+      text-align: center;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-  <h2>MC AryanzUtama</h2>
-  <input id="name" placeholder="Nama">
-  <select id="role">
-    <option value="buyer">Buyer</option>
-    <option value="seller">Seller</option>
-    <option value="admin">Admin</option>
-  </select>
-  <input id="code" placeholder="Room Code">
-  <button onclick="masuk()">Masuk</button>
-</div>
+  <div class="card">
+    <h1>AryanzUtama</h1>
+    <p>Sistem MC Online</p>
 
-<!-- ROOM -->
-<div id="room" class="hidden">
-  <div class="header">
-    <div>Room Code: <span id="roomCode"></span></div>
-    <div class="status" id="status">MENUNGGU PEMBAYARAN</div>
+    <input id="name" placeholder="Nama kamu">
+    
+    <select id="role">
+      <option value="">Pilih Peran</option>
+      <option value="buyer">Buyer</option>
+      <option value="seller">Seller</option>
+    </select>
+
+    <input id="roomCode" placeholder="Kode Room MC">
+
+    <button onclick="joinRoom()">Masuk Room</button>
+
+    <div class="status" id="status"></div>
   </div>
-
-  <div id="chat"></div>
-
-  <div id="adminPanel" class="hidden">
-    <button onclick="paymentMasuk()">PAYMENT MASUK</button>
-    <button onclick="done()">DONE</button>
-  </div>
-
-  <div class="input">
-    <input id="message" placeholder="Tulis pesan...">
-    <button onclick="kirim()">Kirim</button>
-  </div>
-</div>
 
 <script>
-let user = {};
-let messages = [];
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzEWMApBlM1m-XMXPgYHZ0_I_Rbbsr8UegV-UqSHbDFkat-hpBH662B-2PFItjteZi1xQ/exec";
 
-function masuk(){
-  user.name = name.value;
-  user.role = role.value;
-  user.code = code.value;
+function joinRoom() {
+  const name = document.getElementById("name").value.trim();
+  const role = document.getElementById("role").value;
+  const roomCode = document.getElementById("roomCode").value.trim();
+  const status = document.getElementById("status");
 
-  if(!user.name || !user.code){
-    alert("Lengkapi data");
+  if (!name || !role || !roomCode) {
+    status.innerText = "❌ Lengkapi semua data";
     return;
   }
 
-  login.classList.add("hidden");
-  room.classList.remove("hidden");
-  roomCode.innerText = user.code;
+  const token = localStorage.getItem("mc_token_" + roomCode);
 
-  if(user.role === "admin"){
-    adminPanel.classList.remove("hidden");
-  }
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "joinRoom",
+      name,
+      role,
+      roomCode,
+      token
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success) {
+      status.innerText = "❌ " + data.error;
+      return;
+    }
 
-  tambahPesan("SYSTEM",""+user.name+" masuk sebagai "+user.role);
-}
-
-function tambahPesan(nama, teks){
-  const div = document.createElement("div");
-  div.className="msg";
-  div.innerHTML = `<b>${nama}:</b> ${teks}`;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function kirim(){
-  if(!message.value) return;
-  tambahPesan(user.name, message.value);
-  message.value="";
-}
-
-function paymentMasuk(){
-  status.innerText="PAYMENT MASUK";
-  tambahPesan("ADMIN","PAYMENT MASUKKK ✅ lanjut ajaa");
-}
-
-function done(){
-  tambahPesan("SYSTEM","MC DONE ✅");
-  status.innerText="DONE";
+    localStorage.setItem("mc_token_" + roomCode, data.token);
+    status.innerText = "✅ Masuk sebagai " + data.role.toUpperCase();
+  })
+  .catch(() => {
+    status.innerText = "❌ Gagal koneksi server";
+  });
 }
 </script>
 
