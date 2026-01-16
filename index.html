@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body>
+<button onclick="test()">Test GAS</button>
+
+<script>
+function test(){
+  fetch("https://script.google.com/macros/s/AKfycbwAQiRUd9pRi0bKW8F_udM5geXIuLr6gkABAdt0c8AP8Qiw67KDcedyi3gY6n9S3WywJA/exec")
+    .then(res => res.json()
+    .then(data => alert(JSON.stringify(data)))
+    .catch(err => alert("ERROR: " + err));
+}
+</script>
+</body>
+</html>
