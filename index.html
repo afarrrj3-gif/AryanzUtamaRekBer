@@ -1,136 +1,144 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>MC AryanzUtama</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0f4cff, #6ecbff);
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-    }
+<meta charset="UTF-8">
+<title>MC AryanzUtama</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    .card {
-      background: rgba(255,255,255,0.12);
-      backdrop-filter: blur(10px);
-      padding: 25px;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 360px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      animation: fadeIn 0.8s ease;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 5px;
-    }
-
-    p {
-      text-align: center;
-      font-size: 13px;
-      opacity: .9;
-      margin-bottom: 20px;
-    }
-
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      outline: none;
-    }
-
-    button {
-      background: #ffffff;
-      color: #0f4cff;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      opacity: .9;
-    }
-
-    .status {
-      text-align: center;
-      font-size: 13px;
-      margin-top: 10px;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg,#e6f4ff,#ffffff);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.box{
+  background:white;
+  padding:25px;
+  width:90%;
+  max-width:420px;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+h2{
+  text-align:center;
+  color:#1b6fd8;
+  margin-top:0;
+}
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:15px;
+}
+button{
+  margin-top:18px;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:#1b6fd8;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+button:hover{
+  background:#155ec0;
+}
+#status{
+  margin-top:15px;
+  text-align:center;
+  font-size:14px;
+}
+.footer{
+  margin-top:20px;
+  text-align:center;
+  font-size:12px;
+  color:#777;
+}
+</style>
 </head>
+
 <body>
 
-  <div class="card">
-    <h1>AryanzUtama</h1>
-    <p>Sistem MC Online</p>
+<div class="box">
+  <h2>MC AryanzUtama</h2>
 
-    <input id="name" placeholder="Nama kamu">
-    
-    <select id="role">
-      <option value="">Pilih Peran</option>
-      <option value="buyer">Buyer</option>
-      <option value="seller">Seller</option>
-    </select>
+  <input id="name" placeholder="Nama kamu">
+  
+  <select id="role">
+    <option value="">Pilih Peran</option>
+    <option value="buyer">Buyer</option>
+    <option value="seller">Seller</option>
+  </select>
 
-    <input id="roomCode" placeholder="Kode Room MC">
+  <input id="code" placeholder="Masukkan Code Room">
 
-    <button onclick="joinRoom()">Masuk Room</button>
+  <button onclick="joinRoom()">MASUK ROOM</button>
 
-    <div class="status" id="status"></div>
+  <div id="status"></div>
+
+  <div class="footer">
+    Situs resmi AryanzUtama<br>
+    PoweredByAryanzUtama
   </div>
+</div>
 
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzEWMApBlM1m-XMXPgYHZ0_I_Rbbsr8UegV-UqSHbDFkat-hpBH662B-2PFItjteZi1xQ/exec";
 
-function joinRoom() {
+function joinRoom(){
   const name = document.getElementById("name").value.trim();
   const role = document.getElementById("role").value;
-  const roomCode = document.getElementById("roomCode").value.trim();
+  const roomCode = document.getElementById("code").value.trim();
   const status = document.getElementById("status");
 
-  if (!name || !role || !roomCode) {
-    status.innerText = "❌ Lengkapi semua data";
+  if(!name || !role || !roomCode){
+    status.style.color="red";
+    status.innerText="Lengkapi semua data!";
     return;
   }
 
-  const token = localStorage.getItem("mc_token_" + roomCode);
+  status.style.color="#555";
+  status.innerText="Menghubungkan ke room...";
 
-  fetch(GAS_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      action: "joinRoom",
+  fetch(GAS_URL,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      action:"joinRoom",
       name,
       role,
-      roomCode,
-      token
+      roomCode
     })
   })
-  .then(res => res.json())
-  .then(data => {
-    if (!data.success) {
-      status.innerText = "❌ " + data.error;
-      return;
-    }
+  .then(res=>res.json())
+  .then(data=>{
+    if(data.success){
+      localStorage.setItem("mc_token",data.token);
+      localStorage.setItem("mc_role",data.role);
+      localStorage.setItem("mc_room",roomCode);
 
-    localStorage.setItem("mc_token_" + roomCode, data.token);
-    status.innerText = "✅ Masuk sebagai " + data.role.toUpperCase();
+      status.style.color="green";
+      status.innerText="Berhasil masuk room sebagai "+data.role.toUpperCase();
+
+      // nanti redirect ke halaman chat
+      // window.location.href = "room.html";
+    }else{
+      status.style.color="red";
+      status.innerText="Gagal: "+data.error;
+    }
   })
-  .catch(() => {
-    status.innerText = "❌ Gagal koneksi server";
+  .catch(()=>{
+    status.style.color="red";
+    status.innerText="Server tidak merespon";
   });
 }
 </script>
