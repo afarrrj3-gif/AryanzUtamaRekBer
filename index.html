@@ -264,7 +264,30 @@ function addMsg(name, text, cls) {
   div.innerText = name + " : " + text;
   document.getElementById("chat").appendChild(div);
 }
-</script>
+<script>
+const GAS_URL = "PASTE_URL_GAS_LU_DISINI"; // URL /exec
 
+function kirimPaymentMasuk() {
+  const data = {
+    action: "payment_masuk",
+    buyer: document.getElementById("buyer").value,
+    seller: document.getElementById("seller").value
+  };
+
+  fetch(GAS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(res => {
+    alert("✅ Payment dikonfirmasi!\nAdmin sudah dapat notif Telegram");
+  })
+  .catch(err => {
+    alert("❌ Gagal kirim ke admin");
+    console.error(err);
+  });
+}
+</script>
 </body>
 </html>
