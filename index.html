@@ -2,144 +2,267 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>MC AryanzUtama</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MC AryanzUtama System</title>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:linear-gradient(135deg,#e6f4ff,#ffffff);
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
 }
-.box{
-  background:white;
-  padding:25px;
-  width:90%;
-  max-width:420px;
-  border-radius:18px;
-  box-shadow:0 10px 30px rgba(0,0,0,.12);
+
+header {
+  background: #020617;
+  padding: 12px;
+  text-align: center;
+  font-weight: bold;
 }
-h2{
-  text-align:center;
-  color:#1b6fd8;
-  margin-top:0;
+
+.container {
+  padding: 15px;
 }
-input,select{
-  width:100%;
-  padding:12px;
-  margin-top:12px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  font-size:15px;
+
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
 }
-button{
-  margin-top:18px;
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:12px;
-  background:#1b6fd8;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
+
+button {
+  background: #22c55e;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
 }
-button:hover{
-  background:#155ec0;
+
+button:disabled {
+  background: gray;
 }
-#status{
-  margin-top:15px;
-  text-align:center;
-  font-size:14px;
+
+#chatBox {
+  display: none;
 }
-.footer{
-  margin-top:20px;
-  text-align:center;
-  font-size:12px;
-  color:#777;
+
+.chat {
+  background: #020617;
+  padding: 10px;
+  height: 320px;
+  overflow-y: auto;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.msg {
+  margin-bottom: 8px;
+}
+
+.me {
+  color: #22c55e;
+}
+
+.other {
+  color: #38bdf8;
+}
+
+.system {
+  color: #facc15;
+  font-style: italic;
+}
+
+footer {
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 20px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="box">
-  <h2>MC AryanzUtama</h2>
+<header>MC AryanzUtama System</header>
 
+<div class="container">
+
+<!-- LOGIN -->
+<div id="loginBox">
   <input id="name" placeholder="Nama kamu">
-  
   <select id="role">
-    <option value="">Pilih Peran</option>
+    <option value="">Pilih Role</option>
     <option value="buyer">Buyer</option>
     <option value="seller">Seller</option>
   </select>
+  <input id="roomCode" placeholder="Room Code">
+  <button onclick="joinRoom()">MASUK</button>
+</div>
 
-  <input id="code" placeholder="Masukkan Code Room">
+<!-- CHAT -->
+<div id="chatBox">
+  <div class="chat" id="chat"></div>
 
-  <button onclick="joinRoom()">MASUK ROOM</button>
+  <input id="message" placeholder="Ketik pesan...">
+  <button onclick="sendMessage()">KIRIM PESAN</button>
 
-  <div id="status"></div>
+  <input type="file" id="file">
+  <button onclick="sendImage()">UPLOAD SS PAYMENT</button>
 
-  <div class="footer">
-    Situs resmi AryanzUtama<br>
-    PoweredByAryanzUtama
-  </div>
+  <button onclick="sendDone()">DONE</button>
+</div>
+
+<footer>
+Verified by Nexora ID / Powered By AryanzUtama
+</footer>
+
 </div>
 
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzEWMApBlM1m-XMXPgYHZ0_I_Rbbsr8UegV-UqSHbDFkat-hpBH662B-2PFItjteZi1xQ/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbx53aPBr4dObFd3ZuBkdqQLHwH_jW-7pn7A6OB_CyRscDpke0lD67UM-xt0ddGaIgU/exec";
 
-function joinRoom(){
-  const name = document.getElementById("name").value.trim();
-  const role = document.getElementById("role").value;
-  const roomCode = document.getElementById("code").value.trim();
-  const status = document.getElementById("status");
+let room = "";
+let nameUser = "";
+let roleUser = "";
+let token = "";
 
-  if(!name || !role || !roomCode){
-    status.style.color="red";
-    status.innerText="Lengkapi semua data!";
+function joinRoom() {
+  nameUser = document.getElementById("name").value;
+  roleUser = document.getElementById("role").value;
+  room = document.getElementById("roomCode").value;
+
+  if (!nameUser || !roleUser || !room) {
+    alert("Lengkapi data");
     return;
   }
 
-  status.style.color="#555";
-  status.innerText="Menghubungkan ke room...";
-
-  fetch(GAS_URL,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      action:"joinRoom",
-      name,
-      role,
-      roomCode
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "joinRoom",
+      roomCode: room,
+      name: nameUser,
+      role: roleUser,
+      token: localStorage.getItem("token_" + room)
     })
   })
-  .then(res=>res.json())
-  .then(data=>{
-    if(data.success){
-      localStorage.setItem("mc_token",data.token);
-      localStorage.setItem("mc_role",data.role);
-      localStorage.setItem("mc_room",roomCode);
-
-      status.style.color="green";
-      status.innerText="Berhasil masuk room sebagai "+data.role.toUpperCase();
-
-      // nanti redirect ke halaman chat
-      // window.location.href = "room.html";
-    }else{
-      status.style.color="red";
-      status.innerText="Gagal: "+data.error;
+  .then(r => r.json())
+  .then(res => {
+    if (!res.success) {
+      alert(res.error);
+      return;
     }
-  })
-  .catch(()=>{
-    status.style.color="red";
-    status.innerText="Server tidak merespon";
+
+    token = res.token;
+    localStorage.setItem("token_" + room, token);
+
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("chatBox").style.display = "block";
+
+    addMsg("SYSTEM", "Kamu masuk sebagai " + roleUser, "system");
+    loadChat();
+    setInterval(loadChat, 2000);
   });
+}
+
+function loadChat() {
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "getMessages",
+      roomCode: room
+    })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (!res.success) return;
+    const chat = document.getElementById("chat");
+    chat.innerHTML = "";
+    res.messages.forEach(m => {
+      addMsg(m.name, m.text, m.role === roleUser ? "me" : "other");
+    });
+    chat.scrollTop = chat.scrollHeight;
+  });
+}
+
+function sendMessage() {
+  const msg = document.getElementById("message").value;
+  if (!msg) return;
+
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "sendMessage",
+      roomCode: room,
+      name: nameUser,
+      role: roleUser,
+      token: token,
+      text: msg
+    })
+  });
+
+  document.getElementById("message").value = "";
+}
+
+function sendImage() {
+  const file = document.getElementById("file").files[0];
+  if (!file) return alert("Pilih gambar");
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "sendImage",
+        roomCode: room,
+        name: nameUser,
+        role: roleUser,
+        token: token,
+        image: reader.result
+      })
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function sendDone() {
+  const doneText = `
+*Format Done bye AryanzUtama*
+____________________________
+Nomor dana tujuan :
+Atas nama :
+Dana : ✅
+____________________________
+Dana :
+Gopay :
+Qris :
+Ovo :
+Sea :
+
+*PERHATIAN*
+Tf selain Dana dikenakan biaya 1k
+`;
+
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "sendMessage",
+      roomCode: room,
+      name: "ADMIN",
+      role: "admin",
+      token: "admin",
+      text: doneText
+    })
+  });
+}
+
+function addMsg(name, text, cls) {
+  const div = document.createElement("div");
+  div.className = "msg " + cls;
+  div.innerText = name + " : " + text;
+  document.getElementById("chat").appendChild(div);
 }
 </script>
 
