@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <title>MC AryanzUtama</title>
@@ -8,89 +8,123 @@
 body{
   margin:0;
   font-family: Arial, sans-serif;
-  background:url("https://res.cloudinary.com/dtdodhqqi/image/upload/v1768802294/c6690caf0ff598a60ae714931b491f62_1_mv91ik.jpg");
-  background-size:cover;
+  background: url("https://res.cloudinary.com/dtdodhqqi/image/upload/v1768802294/c6690caf0ff598a60ae714931b491f62_1_mv91ik.jpg");
+  background-size: cover;
+  color:#000;
 }
 
-#form,#room{
+.container{
   max-width:420px;
   margin:auto;
-  margin-top:20px;
-  background:#111c;
-  padding:15px;
-  border-radius:10px;
+  height:100vh;
+  background:#e5ddd5;
+  display:flex;
+  flex-direction:column;
+}
+
+header{
+  background:#075e54;
   color:white;
+  padding:10px;
+  font-weight:bold;
+}
+
+#form{
+  padding:15px;
 }
 
 input,select,button{
   width:100%;
   padding:10px;
   margin-top:8px;
-  border-radius:6px;
-  border:none;
+  border-radius:5px;
+  border:1px solid #ccc;
 }
 
 button{
-  background:#25D366;
-  color:black;
+  background:#25d366;
+  color:white;
+  border:none;
   font-weight:bold;
-  cursor:pointer;
 }
 
-#chat{
-  height:350px;
-  overflow-y:auto;
+#chatBox{
+  flex:1;
   padding:10px;
-  background:#e5ddd5;
-  border-radius:10px;
-  margin-bottom:10px;
+  overflow-y:auto;
 }
 
-.msg{
+.bubble{
   max-width:75%;
   padding:8px;
-  margin-bottom:8px;
+  margin:6px 0;
   border-radius:8px;
   font-size:14px;
 }
 
-.buyer{background:#dcf8c6;margin-left:auto;}
-.seller{background:#fff;}
-.admin{background:#ffeeba;margin:auto;}
+.me{
+  background:#dcf8c6;
+  margin-left:auto;
+}
+
+.other{
+  background:white;
+}
 
 .time{
   font-size:10px;
-  color:#555;
   text-align:right;
+  color:#666;
+}
+
+.footer{
+  display:flex;
+  padding:8px;
+  background:#f0f0f0;
+}
+
+.footer input{
+  flex:1;
 }
 </style>
 </head>
 
 <body>
+<div class="container">
+
+<header id="header">MC AryanzUtama</header>
 
 <div id="form">
-  <h3>MC Room</h3>
   <input id="name" placeholder="Nama">
   <select id="role">
     <option value="BUYER">BUYER</option>
     <option value="SELLER">SELLER</option>
   </select>
   <input id="nominal" placeholder="Nominal">
+
   <button onclick="buatRoom()">BUAT ROOM</button>
+
   <hr>
+
   <input id="roomCode" placeholder="Room Code">
   <button onclick="masukRoom()">MASUK ROOM</button>
 </div>
 
-<div id="room" style="display:none">
-  <div id="chat"></div>
-  <input id="msg" placeholder="Ketik pesan">
-  <button onclick="kirim()">KIRIM</button>
+<div id="room" style="display:none;flex:1;flex-direction:column">
+  <div id="chatBox"></div>
+
+  <div class="footer">
+    <input id="msg" placeholder="Ketik pesan">
+    <button onclick="kirim()">KIRIM</button>
+  </div>
+</div>
+
 </div>
 
 <script>
-const GAS = "https://script.google.com/macros/s/AKfycbyTB1eH_-xT7kgtkD8dvkq1-5ZAUx32nXLKy9WAqknEv8TX8RuXwSL-hC99ClrdZWP6sA/exec";
-let token="", myRole="";
+const GAS = "https://script.google.com/macros/s/AKfycbx61YG_IOw9Hlk_VJwNiOQmFhbpeFFwRau1EJHttnyJY4KmlKIu6jo23WVZbSCZLfvJ6w/exec";
+let token = "";
+let roleUser = "";
 
 function buatRoom(){
   fetch(GAS,{
@@ -103,13 +137,18 @@ function buatRoom(){
   })
   .then(r=>r.json())
   .then(d=>{
+    if(!d.roomCode){
+      alert("Gagal buat room");
+      return;
+    }
+    roomCode.value = d.roomCode;
     alert("ROOM CODE: "+d.roomCode);
-    roomCode.value=d.roomCode;
   });
 }
 
 function masukRoom(){
-  myRole = role.value;
+  roleUser = role.value;
+
   fetch(GAS,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -117,31 +156,37 @@ function masukRoom(){
       action:"joinRoom",
       roomCode:roomCode.value,
       name:name.value,
-      role:myRole
+      role:role.value
     })
   })
   .then(r=>r.json())
   .then(d=>{
-    token=d.token;
-    form.style.display="none";
-    room.style.display="block";
+    if(!d.success){
+      alert("Room tidak ditemukan");
+      return;
+    }
+    token = d.token;
+    document.getElementById("form").style.display="none";
+    document.getElementById("room").style.display="flex";
     loadChat();
     setInterval(loadChat,1500);
   });
 }
 
 function kirim(){
-  if(!msg.value) return;
+  if(!msg.value.trim()) return;
+
   fetch(GAS,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
       action:"sendChat",
       token:token,
-      from:myRole,
+      from:roleUser,
       text:msg.value
     })
   });
+
   msg.value="";
 }
 
@@ -156,14 +201,14 @@ function loadChat(){
   })
   .then(r=>r.json())
   .then(d=>{
-    chat.innerHTML="";
+    chatBox.innerHTML="";
     (d.chat||[]).forEach(c=>{
       let div=document.createElement("div");
-      div.className="msg "+c.from.toLowerCase();
-      div.innerHTML=`${c.text}<div class="time">${c.time}</div>`;
-      chat.appendChild(div);
+      div.className="bubble "+(c.from===roleUser?"me":"other");
+      div.innerHTML=`<b>${c.from}</b><br>${c.text}<div class="time">${c.time}</div>`;
+      chatBox.appendChild(div);
     });
-    chat.scrollTop=chat.scrollHeight;
+    chatBox.scrollTop=chatBox.scrollHeight;
   });
 }
 </script>
