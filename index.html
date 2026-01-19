@@ -3,90 +3,168 @@
 <head>
 <meta charset="UTF-8">
 <title>MC AryanzUtama</title>
+
 <style>
-body{font-family:sans-serif;background:#0a2a43;color:white}
-input,button{padding:10px;margin:5px;width:90%}
-#chat{height:300px;overflow:auto;background:#fff;color:#000;padding:10px}
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:url("https://res.cloudinary.com/dtdodhqqi/image/upload/v1768802294/c6690caf0ff598a60ae714931b491f62_1_mv91ik.jpg");
+  background-size:cover;
+}
+
+#form,#room{
+  max-width:420px;
+  margin:auto;
+  margin-top:20px;
+  background:#111c;
+  padding:15px;
+  border-radius:10px;
+  color:white;
+}
+
+input,select,button{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:6px;
+  border:none;
+}
+
+button{
+  background:#25D366;
+  color:black;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+#chat{
+  height:350px;
+  overflow-y:auto;
+  padding:10px;
+  background:#e5ddd5;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+.msg{
+  max-width:75%;
+  padding:8px;
+  margin-bottom:8px;
+  border-radius:8px;
+  font-size:14px;
+}
+
+.buyer{background:#dcf8c6;margin-left:auto;}
+.seller{background:#fff;}
+.admin{background:#ffeeba;margin:auto;}
+
+.time{
+  font-size:10px;
+  color:#555;
+  text-align:right;
+}
 </style>
 </head>
 
 <body>
 
-<h2>MC Room</h2>
-
 <div id="form">
-<input id="name" placeholder="Nama">
-<select id="role">
-<option>BUYER</option>
-<option>SELLER</option>
-</select>
-<input id="nominal" placeholder="Nominal">
-<button onclick="buatRoom()">BUAT ROOM</button>
-<input id="roomCode" placeholder="Room Code">
-<button onclick="masukRoom()">MASUK ROOM</button>
+  <h3>MC Room</h3>
+  <input id="name" placeholder="Nama">
+  <select id="role">
+    <option value="BUYER">BUYER</option>
+    <option value="SELLER">SELLER</option>
+  </select>
+  <input id="nominal" placeholder="Nominal">
+  <button onclick="buatRoom()">BUAT ROOM</button>
+  <hr>
+  <input id="roomCode" placeholder="Room Code">
+  <button onclick="masukRoom()">MASUK ROOM</button>
 </div>
 
 <div id="room" style="display:none">
-<div id="chat"></div>
-<input id="msg" placeholder="Ketik pesan">
-<button onclick="kirim()">KIRIM</button>
+  <div id="chat"></div>
+  <input id="msg" placeholder="Ketik pesan">
+  <button onclick="kirim()">KIRIM</button>
 </div>
 
 <script>
 const GAS = "https://script.google.com/macros/s/AKfycbxdiGr54Z_qXg-Hp11_AyABPqZYJUtAzW9Vt0YoU_7vJXsPKw8YFze-lhQ8Yti8C2ETfA/exec";
-let token = "";
+let token="", myRole="";
 
 function buatRoom(){
-fetch(GAS,{method:"POST",body:JSON.stringify({
-action:"createRoom",
-nominal:nominal.value
-})})
-.then(r=>r.json())
-.then(d=>{
-alert("ROOM CODE: "+d.roomCode);
-roomCode.value=d.roomCode;
-});
+  fetch(GAS,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      action:"createRoom",
+      nominal:nominal.value
+    })
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    alert("ROOM CODE: "+d.roomCode);
+    roomCode.value=d.roomCode;
+  });
 }
 
 function masukRoom(){
-fetch(GAS,{method:"POST",body:JSON.stringify({
-action:"joinRoom",
-roomCode:roomCode.value,
-name:name.value,
-role:role.value
-})})
-.then(r=>r.json())
-.then(d=>{
-token=d.token;
-form.style.display="none";
-room.style.display="block";
-loadChat();
-setInterval(loadChat,1500);
-});
+  myRole = role.value;
+  fetch(GAS,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      action:"joinRoom",
+      roomCode:roomCode.value,
+      name:name.value,
+      role:myRole
+    })
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    token=d.token;
+    form.style.display="none";
+    room.style.display="block";
+    loadChat();
+    setInterval(loadChat,1500);
+  });
 }
 
 function kirim(){
-fetch(GAS,{method:"POST",body:JSON.stringify({
-action:"sendChat",
-token:token,
-from:role.value,
-text:msg.value
-})});
-msg.value="";
+  if(!msg.value) return;
+  fetch(GAS,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      action:"sendChat",
+      token:token,
+      from:myRole,
+      text:msg.value
+    })
+  });
+  msg.value="";
 }
 
 function loadChat(){
-fetch(GAS,{method:"POST",body:JSON.stringify({
-action:"getChat",
-token:token
-})})
-.then(r=>r.json())
-.then(d=>{
-chat.innerHTML="";
-(d.chat||[]).forEach(c=>{
-chat.innerHTML+=`<p><b>${c.from}</b>: ${c.text}<br><small>${c.time}</small></p>`;
-});
-});
+  fetch(GAS,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      action:"getChat",
+      token:token
+    })
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    chat.innerHTML="";
+    (d.chat||[]).forEach(c=>{
+      let div=document.createElement("div");
+      div.className="msg "+c.from.toLowerCase();
+      div.innerHTML=`${c.text}<div class="time">${c.time}</div>`;
+      chat.appendChild(div);
+    });
+    chat.scrollTop=chat.scrollHeight;
+  });
 }
 </script>
 
