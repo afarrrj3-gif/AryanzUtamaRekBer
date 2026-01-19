@@ -1,101 +1,92 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MC AryanzUtama</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #e0f0ff; color: #003366; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-  h1 { text-align: center; }
-  .box { background: #ffffff; padding: 20px; margin: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-  input, select, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; }
-  button { background: #3399ff; color: white; cursor: pointer; font-weight: bold; transition: 0.3s; }
-  button:hover { background: #2673cc; }
+body{font-family:sans-serif;background:#0a2a43;color:white}
+input,button{padding:10px;margin:5px;width:90%}
+#chat{height:300px;overflow:auto;background:#fff;color:#000;padding:10px}
 </style>
 </head>
+
 <body>
 
-<h1>MC AryanzUtama</h1>
+<h2>MC Room</h2>
 
-<div class="box">
-  <h3>Payment Masuk (Buyer)</h3>
-  <input type="text" id="buyer" placeholder="Nama Buyer">
-  <input type="text" id="seller" placeholder="Nama Seller">
-  <button onclick="kirimPaymentMasuk()">Kirim Payment Masuk</button>
+<div id="form">
+<input id="name" placeholder="Nama">
+<select id="role">
+<option>BUYER</option>
+<option>SELLER</option>
+</select>
+<input id="nominal" placeholder="Nominal">
+<button onclick="buatRoom()">BUAT ROOM</button>
+<input id="roomCode" placeholder="Room Code">
+<button onclick="masukRoom()">MASUK ROOM</button>
 </div>
 
-<div class="box">
-  <h3>Format Done (Seller)</h3>
-  <input type="text" id="doneBuyer" placeholder="Nama Buyer">
-  <input type="text" id="doneSeller" placeholder="Nama Seller">
-  <input type="text" id="nomor" placeholder="Nomor e-wallet">
-  <input type="text" id="nama" placeholder="Atas Nama">
-  <select id="eWallet" multiple>
-    <option value="Dana">Dana</option>
-    <option value="Gopay">Gopay</option>
-    <option value="Qris">Qris</option>
-    <option value="Ovo">Ovo</option>
-    <option value="Sea">Sea</option>
-  </select>
-  <button onclick="kirimFormatDone()">Kirim Format Done</button>
-</div>
-
-<div class="box">
-  <h3>Sudah TF (Admin)</h3>
-  <input type="text" id="tfBuyer" placeholder="Nama Buyer">
-  <button onclick="kirimSudahTF()">Sudah TF</button>
+<div id="room" style="display:none">
+<div id="chat"></div>
+<input id="msg" placeholder="Ketik pesan">
+<button onclick="kirim()">KIRIM</button>
 </div>
 
 <script>
-const GAS_URL = "PASTE_URL_GAS_LU_DISINI"; // Ganti dengan URL /exec GAS mu
+const GAS = "PASTE_URL_GAS_LU_DISINI";
+let token = "";
 
-function kirimPaymentMasuk() {
-  const buyer = document.getElementById("buyer").value.trim();
-  const seller = document.getElementById("seller").value.trim();
-  if(!buyer || !seller){ alert("Nama Buyer & Seller wajib diisi!"); return; }
-
-  fetch(GAS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "payment_masuk", buyer, seller })
-  })
-  .then(res => res.json())
-  .then(res => { if(res.success) alert("✅ Payment dikonfirmasi! Admin sudah dapat notif Telegram"); else alert("❌ Error: "+res.error); })
-  .catch(err => { alert("❌ Gagal kirim ke admin"); console.error(err); });
+function buatRoom(){
+fetch(GAS,{method:"POST",body:JSON.stringify({
+action:"createRoom",
+nominal:nominal.value
+})})
+.then(r=>r.json())
+.then(d=>{
+alert("ROOM CODE: "+d.roomCode);
+roomCode.value=d.roomCode;
+});
 }
 
-function kirimFormatDone() {
-  const buyer = document.getElementById("doneBuyer").value.trim();
-  const seller = document.getElementById("doneSeller").value.trim();
-  const nomor = document.getElementById("nomor").value.trim();
-  const nama = document.getElementById("nama").value.trim();
-  const eWalletSelect = document.getElementById("eWallet");
-  const e_wallet = Array.from(eWalletSelect.selectedOptions).map(o => o.value);
-
-  if(!buyer || !seller || !nomor || !nama || e_wallet.length===0){ alert("Semua field wajib diisi!"); return; }
-
-  fetch(GAS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "format_done", buyer, seller, nomor, nama, e_wallet })
-  })
-  .then(res => res.json())
-  .then(res => { if(res.success) alert("✅ Format Done dikirim ke Admin"); else alert("❌ Error: "+res.error); })
-  .catch(err => { alert("❌ Gagal kirim ke admin"); console.error(err); });
+function masukRoom(){
+fetch(GAS,{method:"POST",body:JSON.stringify({
+action:"joinRoom",
+roomCode:roomCode.value,
+name:name.value,
+role:role.value
+})})
+.then(r=>r.json())
+.then(d=>{
+token=d.token;
+form.style.display="none";
+room.style.display="block";
+loadChat();
+setInterval(loadChat,1500);
+});
 }
 
-function kirimSudahTF() {
-  const buyer = document.getElementById("tfBuyer").value.trim();
-  if(!buyer){ alert("Nama Buyer wajib diisi!"); return; }
+function kirim(){
+fetch(GAS,{method:"POST",body:JSON.stringify({
+action:"sendChat",
+token:token,
+from:role.value,
+text:msg.value
+})});
+msg.value="";
+}
 
-  fetch(GAS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "sudah_tf", buyer })
-  })
-  .then(res => res.json())
-  .then(res => { if(res.success) alert("✅ Pesan TF dikirim ke Telegram"); else alert("❌ Error: "+res.error); })
-  .catch(err => { alert("❌ Gagal kirim ke admin"); console.error(err); });
+function loadChat(){
+fetch(GAS,{method:"POST",body:JSON.stringify({
+action:"getChat",
+token:token
+})})
+.then(r=>r.json())
+.then(d=>{
+chat.innerHTML="";
+(d.chat||[]).forEach(c=>{
+chat.innerHTML+=`<p><b>${c.from}</b>: ${c.text}<br><small>${c.time}</small></p>`;
+});
+});
 }
 </script>
 
