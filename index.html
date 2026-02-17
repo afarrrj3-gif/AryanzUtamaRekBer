@@ -1,207 +1,313 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Telegram Real Clone</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+<title>MC Chat System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{
-font-family:"Noto Color Emoji",system-ui;
+font-family:'Inter',-apple-system,BlinkMacSystemFont;
 background:url('https://res.cloudinary.com/dtdodhqqi/image/upload/v1771310542/c36725a5a2a254a5df8c7dd4bdaa05af_v3tzna.jpg');
 background-size:cover;
-height:100vh;display:flex;justify-content:center;align-items:center;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
 }
-.app{width:100%;max-width:420px;height:100vh;display:flex;flex-direction:column;backdrop-filter:blur(12px)}
-.header{padding:14px;background:#17212b;color:white;font-weight:600}
-.chat{flex:1;overflow-y:auto;padding:10px;scroll-behavior:smooth}
-.msg{display:flex;margin:6px 0;animation:fade .2s ease}
+
+.app{
+width:100%;
+max-width:430px;
+height:100vh;
+display:flex;
+flex-direction:column;
+backdrop-filter:blur(18px);
+}
+
+.header{
+padding:14px;
+font-weight:600;
+color:white;
+background:#0f1720;
+}
+
+.chat{
+flex:1;
+overflow-y:auto;
+padding:12px;
+scroll-behavior:smooth;
+}
+
+.message{
+display:flex;
+margin:6px 0;
+animation:fade .15s ease;
+}
+
 .me{justify-content:flex-end}
+.other{justify-content:flex-start}
+
 .bubble{
-position:relative;padding:8px 10px 18px 10px;
-border-radius:12px;max-width:75%;font-size:15px;
-word-wrap:break-word;line-height:1.35;
-transition:.15s;
+position:relative;
+background:#1f2c39;
+color:white;
+padding:8px 10px;
+border-radius:14px;
+max-width:75%;
+font-size:15px;
+line-height:1.4;
+word-wrap:break-word;
 }
-.bubble:active{transform:scale(.97)}
-.me .bubble{background:#2b5278;color:#fff;border-bottom-right-radius:4px}
-.other .bubble{background:#262d31;color:#fff;border-bottom-left-radius:4px}
+
+.me .bubble{
+background:#2b6cb0;
+border-bottom-right-radius:5px;
+}
+
+.other .bubble{
+border-bottom-left-radius:5px;
+}
+
 .meta{
-font-size:11px;opacity:.7;
-position:absolute;right:8px;bottom:4px;
-display:flex;gap:3px;align-items:center;
+font-size:11px;
+opacity:.8;
+display:flex;
+align-items:center;
+gap:4px;
+margin-top:3px;
+justify-content:flex-end;
 }
-.short{padding-bottom:8px}
-.short .meta{position:static;margin-left:6px;display:inline-flex}
-img{max-width:220px;border-radius:12px;display:block}
-.me img{border-bottom-right-radius:4px}
-.other img{border-bottom-left-radius:4px}
-.input{
-display:flex;padding:8px;background:#17212b;align-items:center
+
+.inline{
+display:inline-flex;
+align-items:center;
+gap:4px;
+margin-left:6px;
+font-size:11px;
+opacity:.8;
 }
+
+.check{
+color:#3ba4ff;
+}
+
+img.chat-img{
+max-width:100%;
+border-radius:6px;
+display:block;
+}
+
+.input-area{
+display:flex;
+align-items:center;
+padding:8px;
+background:#0f1720;
+gap:8px;
+}
+
+.icon-btn{
+width:34px;
+height:34px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+cursor:pointer;
+color:white;
+}
+
 input{
-flex:1;padding:10px;border:none;border-radius:20px;
-background:#2b5278;color:white;outline:none
+flex:1;
+background:#1f2c39;
+border:none;
+outline:none;
+color:white;
+padding:10px 14px;
+border-radius:20px;
+font-size:14px;
 }
-button{
-margin-left:8px;border:none;background:#2b5278;
-width:42px;height:42px;border-radius:50%;
-color:white;cursor:pointer;position:relative;overflow:hidden
+
+.send{
+background:#2b6cb0;
+width:38px;
+height:38px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+color:white;
+cursor:pointer;
 }
-button:active::after{
-content:'';position:absolute;width:100px;height:100px;
-background:rgba(255,255,255,.3);border-radius:50%;
-transform:scale(0);animation:ripple .4s linear
+
+.context{
+position:absolute;
+background:#1c2733;
+border-radius:12px;
+padding:6px 0;
+box-shadow:0 5px 20px rgba(0,0,0,.4);
+z-index:99;
 }
-@keyframes ripple{to{transform:scale(3);opacity:0}}
-@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
-.typing{
-font-size:13px;opacity:.6;margin:4px 10px;
-display:none
+
+.context div{
+padding:8px 16px;
+font-size:14px;
+cursor:pointer;
 }
-.dots::after{
-content:'...';animation:blink 1s infinite
+
+.context div:hover{
+background:#2b6cb0;
 }
-@keyframes blink{0%{opacity:0}50%{opacity:1}100%{opacity:0}}
-.replyBar{
-background:#1e2a35;color:white;
-padding:6px 10px;font-size:13px;
-display:none
+
+@keyframes fade{
+from{opacity:0;transform:translateY(6px)}
+to{opacity:1;transform:translateY(0)}
 }
-.reactionBox{
-position:absolute;bottom:100%;background:#1e2a35;
-padding:4px 8px;border-radius:20px;
-display:flex;gap:6px;font-size:18px;
-}
-.reactionBox span{cursor:pointer}
-.blue{color:#4fc3f7}
 </style>
 </head>
+
 <body>
 
 <div class="app">
-<div class="header">Aeyanz • online</div>
+<div class="header">MC Room</div>
 <div class="chat" id="chat"></div>
 
-<div class="typing" id="typing">typing<span class="dots"></span></div>
-
-<div class="replyBar" id="replyBar"></div>
-
-<div class="input">
-<input id="text" placeholder="Message">
-<button onclick="send()">➤</button>
+<div class="input-area">
+<div class="icon-btn" onclick="toggleEmoji()">😊</div>
+<div class="icon-btn">
+<label for="imgUpload">📎</label>
+<input type="file" id="imgUpload" hidden accept="image/*">
 </div>
+<input type="text" id="text" placeholder="Message">
+<div class="send" onclick="send()">➤</div>
+</div>
+
 </div>
 
 <script>
 const chat=document.getElementById("chat");
 const input=document.getElementById("text");
-const typing=document.getElementById("typing");
-const replyBar=document.getElementById("replyBar");
-let replyText=null;
+const imgUpload=document.getElementById("imgUpload");
 
 function time(){
 const d=new Date();
-return d.getHours().toString().padStart(2,'0')+':'+
+return d.getHours().toString().padStart(2,'0')+":"+
 d.getMinutes().toString().padStart(2,'0');
 }
 
-function scrollDown(){chat.scrollTop=chat.scrollHeight;}
+function createMessage(content,type="me",isImage=false){
 
-function create(text,type="me"){
 const wrap=document.createElement("div");
-wrap.className="msg "+type;
+wrap.className="message "+type;
 
 const bubble=document.createElement("div");
 bubble.className="bubble";
 
-if(text.startsWith("img:")){
+if(isImage){
 const img=document.createElement("img");
-img.src=text.replace("img:","");
+img.src=content;
+img.className="chat-img";
 bubble.appendChild(img);
-bubble.style.padding="4px";
-}else{
-bubble.innerHTML=text;
-}
-
-if(replyText){
-const reply=document.createElement("div");
-reply.style.fontSize="12px";
-reply.style.opacity=".6";
-reply.innerText=replyText;
-bubble.prepend(reply);
-replyText=null;
-replyBar.style.display="none";
-}
 
 const meta=document.createElement("div");
 meta.className="meta";
-meta.innerHTML=`<span>${time()}</span><span class="check">✔✔</span>`;
+meta.innerHTML=`${time()} <span class="check">✔✔</span>`;
 bubble.appendChild(meta);
+}else{
+
+const textSpan=document.createElement("span");
+textSpan.innerText=content;
+bubble.appendChild(textSpan);
+
+if(content.length<40){
+const inline=document.createElement("span");
+inline.className="inline";
+inline.innerHTML=`${time()} <span class="check">✔✔</span>`;
+bubble.appendChild(inline);
+}else{
+const meta=document.createElement("div");
+meta.className="meta";
+meta.innerHTML=`${time()} <span class="check">✔✔</span>`;
+bubble.appendChild(meta);
+}
+}
 
 wrap.appendChild(bubble);
 chat.appendChild(wrap);
+chat.scrollTop=chat.scrollHeight;
 
-requestAnimationFrame(()=>{
-if(bubble.scrollHeight<42)bubble.classList.add("short");
-});
-
-setTimeout(()=>{
-meta.querySelector(".check").classList.add("blue");
-},1200);
-
-bubble.addEventListener("contextmenu",e=>{
+bubble.oncontextmenu=(e)=>{
 e.preventDefault();
-showReaction(bubble);
-});
-
-let hold;
-bubble.addEventListener("mousedown",()=>{
-hold=setTimeout(()=>wrap.remove(),600);
-});
-bubble.addEventListener("mouseup",()=>clearTimeout(hold));
-
-bubble.addEventListener("click",()=>{
-replyText=bubble.innerText;
-replyBar.innerText="Replying to: "+replyText;
-replyBar.style.display="block";
-});
-
-scrollDown();
+showMenu(e.pageX,e.pageY,bubble,textSpan);
+};
 }
 
-function showReaction(bubble){
-const box=document.createElement("div");
-box.className="reactionBox";
-["❤️","😂","🔥","👍"].forEach(e=>{
-const span=document.createElement("span");
-span.innerText=e;
-span.onclick=()=>{
-bubble.append(" "+e);
-box.remove();
-};
-box.appendChild(span);
-});
-bubble.appendChild(box);
-setTimeout(()=>box.remove(),3000);
+function showMenu(x,y,bubble,textSpan){
+removeMenu();
+const menu=document.createElement("div");
+menu.className="context";
+menu.style.left=x+"px";
+menu.style.top=y+"px";
+
+menu.innerHTML=`
+<div onclick="editMsg(this)">Edit</div>
+<div onclick="copyMsg(this)">Copy</div>
+<div onclick="deleteMsg(this)">Delete</div>
+`;
+
+document.body.appendChild(menu);
+
+menu.bubble=bubble;
+menu.textSpan=textSpan;
+}
+
+function removeMenu(){
+const old=document.querySelector(".context");
+if(old) old.remove();
+}
+
+function deleteMsg(el){
+el.parentElement.bubble.parentElement.remove();
+removeMenu();
+}
+
+function copyMsg(el){
+navigator.clipboard.writeText(el.parentElement.bubble.innerText);
+removeMenu();
+}
+
+function editMsg(el){
+const bubble=el.parentElement.bubble;
+const text=bubble.querySelector("span");
+const newText=prompt("Edit message:",text.innerText);
+if(newText){
+text.innerText=newText;
+}
+removeMenu();
 }
 
 function send(){
 const val=input.value.trim();
-if(!val)return;
-create(val,"me");
+if(!val) return;
+createMessage(val,"me");
 input.value="";
-typing.style.display="block";
-setTimeout(()=>{
-typing.style.display="none";
-create("Auto reply: "+val,"other");
-},1500);
 }
 
-input.addEventListener("keypress",e=>{
-if(e.key==="Enter")send();
-});
+imgUpload.onchange=(e)=>{
+const file=e.target.files[0];
+if(!file) return;
+const reader=new FileReader();
+reader.onload=function(ev){
+createMessage(ev.target.result,"me",true);
+};
+reader.readAsDataURL(file);
+};
+
+document.body.onclick=removeMenu;
+
 </script>
 
 </body>
