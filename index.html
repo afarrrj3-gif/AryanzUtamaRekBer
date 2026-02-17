@@ -47,6 +47,7 @@ body{
   background:linear-gradient(135deg,#00a884,#008069);
 }
 
+/* CHAT AREA */
 .chat-box{
   flex:1;
   padding:15px;
@@ -58,12 +59,11 @@ body{
 
   display:flex;
   flex-direction:column;
-  gap:6px;
+  gap:8px;
 }
 
-/* MESSAGE BASE */
+/* MESSAGE */
 .message{
-  display:inline-block;
   position:relative;
   padding:8px 12px 18px 12px;
   border-radius:18px;
@@ -71,11 +71,10 @@ body{
   line-height:1.4;
   word-wrap:break-word;
   max-width:75%;
-  width:auto;
+  width:fit-content;
   animation:fadeIn .2s ease;
 }
 
-/* SENT */
 .sent{
   align-self:flex-end;
   background:#005c4b;
@@ -83,7 +82,6 @@ body{
   border-bottom-right-radius:4px;
 }
 
-/* RECEIVED */
 .received{
   align-self:flex-start;
   background:#202c33;
@@ -96,7 +94,7 @@ body{
   bottom:4px;
   right:8px;
   font-size:10px;
-  opacity:.8;
+  opacity:.85;
   display:flex;
   gap:4px;
   align-items:center;
@@ -107,39 +105,53 @@ body{
   transition:.3s;
 }
 
+/* INPUT TELEGRAM STYLE */
 .chat-input{
   background:#111b21;
   padding:10px;
-  display:flex;
-  gap:8px;
-  align-items:center;
 }
 
-.chat-input input[type="text"]{
+.input-wrapper{
+  background:#202c33;
+  border-radius:30px;
+  display:flex;
+  align-items:center;
+  padding:6px 10px;
+  gap:8px;
+}
+
+.input-wrapper input{
   flex:1;
-  padding:10px 15px;
-  border-radius:20px;
   border:none;
   outline:none;
-  background:#202c33;
+  background:transparent;
   color:white;
   font-size:14px;
 }
 
-.icon-btn{
-  background:#00a884;
+.circle-btn{
+  background:#2a3942;
   border:none;
   color:white;
-  padding:10px;
+  width:38px;
+  height:38px;
   border-radius:50%;
   cursor:pointer;
-  transition:.2s;
   display:flex;
   align-items:center;
   justify-content:center;
+  transition:.2s;
 }
 
-.icon-btn:hover{
+.circle-btn:hover{
+  background:#324b57;
+}
+
+.send-btn{
+  background:#00a884;
+}
+
+.send-btn:hover{
   background:#008069;
 }
 
@@ -196,11 +208,13 @@ img.chat-img{
   </div>
 
   <div class="chat-input">
-    <button class="icon-btn" onclick="toggleEmoji()">😊</button>
-    <input type="text" id="messageInput" placeholder="Ketik pesan...">
-    <input type="file" id="imageInput" accept="image/*" hidden>
-    <button class="icon-btn" onclick="openGallery()">📷</button>
-    <button class="icon-btn" onclick="sendMessage()">➤</button>
+    <div class="input-wrapper">
+      <button class="circle-btn" onclick="toggleEmoji()">😊</button>
+      <input type="text" id="messageInput" placeholder="Message">
+      <input type="file" id="imageInput" accept="image/*" hidden>
+      <button class="circle-btn" onclick="openGallery()">📎</button>
+      <button class="circle-btn send-btn" onclick="sendMessage()">➤</button>
+    </div>
   </div>
 
 </div>
