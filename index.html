@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zenix Chat</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
 *{
@@ -16,30 +16,30 @@
 
 body{
   font-family:'Inter', sans-serif;
-  background:#0f172a;
   height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
+  background:#000;
 }
 
+/* CHAT WRAPPER */
 .chat-container{
   width:100%;
   max-width:420px;
   height:95vh;
-  background:#111827;
-  border-radius:20px;
-  overflow:hidden;
   display:flex;
   flex-direction:column;
+  border-radius:20px;
+  overflow:hidden;
   box-shadow:0 20px 60px rgba(0,0,0,0.6);
 }
 
 /* HEADER */
 .chat-header{
-  padding:15px;
-  background:#1f2937;
+  background:#111b21;
   color:white;
+  padding:15px;
   font-weight:600;
   display:flex;
   align-items:center;
@@ -50,7 +50,7 @@ body{
   width:40px;
   height:40px;
   border-radius:50%;
-  background:linear-gradient(135deg,#3b82f6,#06b6d4);
+  background:linear-gradient(135deg,#00a884,#008069);
 }
 
 /* CHAT AREA */
@@ -58,37 +58,57 @@ body{
   flex:1;
   padding:15px;
   overflow-y:auto;
+  background:url('https://res.cloudinary.com/dtdodhqqi/image/upload/v1771310542/c36725a5a2a254a5df8c7dd4bdaa05af_v3tzna.jpg');
+  background-size:cover;
+  background-position:center;
   scroll-behavior:smooth;
-  background:#0f172a;
 }
 
+/* MESSAGE STYLE */
 .message{
   max-width:75%;
-  padding:10px 14px;
+  padding:8px 12px;
   margin-bottom:10px;
-  border-radius:18px;
+  border-radius:12px;
   font-size:14px;
-  line-height:1.4;
-  animation:fadeIn .2s ease;
+  position:relative;
+  animation:fadeIn .15s ease;
+  word-wrap:break-word;
 }
 
 .sent{
-  background:#2563eb;
+  background:#005c4b;
   color:white;
   margin-left:auto;
-  border-bottom-right-radius:5px;
+  border-bottom-right-radius:4px;
 }
 
 .received{
-  background:#1e293b;
+  background:#202c33;
   color:white;
-  border-bottom-left-radius:5px;
+  border-bottom-left-radius:4px;
 }
 
-/* INPUT AREA */
+/* TIME & CHECK */
+.meta{
+  font-size:10px;
+  opacity:.7;
+  margin-top:3px;
+  text-align:right;
+  display:flex;
+  justify-content:flex-end;
+  gap:4px;
+  align-items:center;
+}
+
+.check{
+  font-size:11px;
+}
+
+/* INPUT */
 .chat-input{
+  background:#111b21;
   padding:10px;
-  background:#1f2937;
   display:flex;
   gap:10px;
 }
@@ -99,12 +119,12 @@ body{
   border-radius:20px;
   border:none;
   outline:none;
-  background:#111827;
+  background:#202c33;
   color:white;
 }
 
 .chat-input button{
-  background:#3b82f6;
+  background:#00a884;
   border:none;
   color:white;
   padding:10px 16px;
@@ -114,24 +134,21 @@ body{
 }
 
 .chat-input button:hover{
-  background:#2563eb;
+  background:#008069;
 }
 
-/* Scrollbar */
 .chat-box::-webkit-scrollbar{
   width:4px;
 }
 .chat-box::-webkit-scrollbar-thumb{
-  background:#374151;
+  background:#555;
   border-radius:10px;
 }
 
-/* Animation */
 @keyframes fadeIn{
   from{opacity:0; transform:translateY(5px);}
   to{opacity:1; transform:translateY(0);}
 }
-
 </style>
 </head>
 <body>
@@ -140,12 +157,10 @@ body{
 
   <div class="chat-header">
     <div class="avatar"></div>
-    Zenix Chat
+    ZenixStore
   </div>
 
   <div class="chat-box" id="chatBox">
-    <div class="message received">Halo 👋</div>
-    <div class="message sent">Halo juga</div>
   </div>
 
   <div class="chat-input">
@@ -159,29 +174,49 @@ body{
 const chatBox = document.getElementById("chatBox");
 const messageInput = document.getElementById("messageInput");
 
+function getTime(){
+  const now = new Date();
+  let h = now.getHours().toString().padStart(2,'0');
+  let m = now.getMinutes().toString().padStart(2,'0');
+  return h + ":" + m;
+}
+
 function sendMessage(){
   const text = messageInput.value.trim();
   if(text === "") return;
 
-  const message = document.createElement("div");
-  message.classList.add("message","sent");
-  message.innerText = text;
+  const msg = document.createElement("div");
+  msg.classList.add("message","sent");
+  msg.innerHTML = `
+    ${text}
+    <div class="meta">
+      ${getTime()}
+      <span class="check">✓</span>
+    </div>
+  `;
 
-  chatBox.appendChild(message);
+  chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
-
   messageInput.value = "";
 
+  // Change to double check after 1s
+  setTimeout(()=>{
+    msg.querySelector(".check").innerHTML = "✓✓";
+  },1000);
+
+  // Auto reply simulation
   setTimeout(()=>{
     autoReply();
-  },600);
+  },1500);
 }
 
 function autoReply(){
   const reply = document.createElement("div");
   reply.classList.add("message","received");
-  reply.innerText = "Pesan diterima ✅";
-
+  reply.innerHTML = `
+    Pesan diterima ✅
+    <div class="meta">${getTime()}</div>
+  `;
   chatBox.appendChild(reply);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
