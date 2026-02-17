@@ -1,324 +1,206 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zenix Chat</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
+<title>Telegram Real Clone</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-
+*{margin:0;padding:0;box-sizing:border-box}
 body{
-  font-family:'Inter',sans-serif;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#000;
+font-family:"Noto Color Emoji",system-ui;
+background:url('https://res.cloudinary.com/dtdodhqqi/image/upload/v1771310542/c36725a5a2a254a5df8c7dd4bdaa05af_v3tzna.jpg');
+background-size:cover;
+height:100vh;display:flex;justify-content:center;align-items:center;
 }
-
-.chat-container{
-  width:100%;
-  max-width:420px;
-  height:95vh;
-  display:flex;
-  flex-direction:column;
-  border-radius:20px;
-  overflow:hidden;
-  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+.app{width:100%;max-width:420px;height:100vh;display:flex;flex-direction:column;backdrop-filter:blur(12px)}
+.header{padding:14px;background:#17212b;color:white;font-weight:600}
+.chat{flex:1;overflow-y:auto;padding:10px;scroll-behavior:smooth}
+.msg{display:flex;margin:6px 0;animation:fade .2s ease}
+.me{justify-content:flex-end}
+.bubble{
+position:relative;padding:8px 10px 18px 10px;
+border-radius:12px;max-width:75%;font-size:15px;
+word-wrap:break-word;line-height:1.35;
+transition:.15s;
 }
-
-.chat-header{
-  background:#111b21;
-  color:white;
-  padding:15px;
-  font-weight:600;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.avatar{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  background:linear-gradient(135deg,#00a884,#008069);
-}
-
-/* CHAT AREA */
-.chat-box{
-  flex:1;
-  padding:15px;
-  overflow-y:auto;
-  background:url('https://res.cloudinary.com/dtdodhqqi/image/upload/v1771310542/c36725a5a2a254a5df8c7dd4bdaa05af_v3tzna.jpg');
-  background-size:cover;
-  background-position:center;
-  scroll-behavior:smooth;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-/* MESSAGE */
-.message{
-  max-width:75%;
-  padding:8px 12px 6px 12px;
-  border-radius:18px;
-  font-size:14px;
-  line-height:1.4;
-  animation:slideIn .25s ease;
-  backdrop-filter: blur(1px);
-}
-
-.sent{
-  align-self:flex-end;
-  background:#0f6a57;
-  color:white;
-  border-bottom-right-radius:4px;
-}
-
-/* META */
+.bubble:active{transform:scale(.97)}
+.me .bubble{background:#2b5278;color:#fff;border-bottom-right-radius:4px}
+.other .bubble{background:#262d31;color:#fff;border-bottom-left-radius:4px}
 .meta{
-  display:flex;
-  justify-content:flex-end;
-  align-items:center;
-  gap:4px;
-  font-size:11px;
-  margin-top:4px;
-  opacity:.85;
+font-size:11px;opacity:.7;
+position:absolute;right:8px;bottom:4px;
+display:flex;gap:3px;align-items:center;
 }
-
-.check{
-  transition:.3s;
+.short{padding-bottom:8px}
+.short .meta{position:static;margin-left:6px;display:inline-flex}
+img{max-width:220px;border-radius:12px;display:block}
+.me img{border-bottom-right-radius:4px}
+.other img{border-bottom-left-radius:4px}
+.input{
+display:flex;padding:8px;background:#17212b;align-items:center
 }
-
-/* IMAGE FIX */
-.chat-img{
-  max-width:220px;
-  border-radius:12px;
-  display:block;
-  border:1px solid rgba(255,255,255,0.08);
-  margin-bottom:4px;
+input{
+flex:1;padding:10px;border:none;border-radius:20px;
+background:#2b5278;color:white;outline:none
 }
-
-/* INPUT TELEGRAM STYLE */
-.chat-input{
-  background:#0f0f0f;
-  padding:10px;
+button{
+margin-left:8px;border:none;background:#2b5278;
+width:42px;height:42px;border-radius:50%;
+color:white;cursor:pointer;position:relative;overflow:hidden
 }
-
-.input-wrapper{
-  background:#1c1c1c;
-  border-radius:30px;
-  display:flex;
-  align-items:center;
-  padding:6px 14px;
-  gap:12px;
+button:active::after{
+content:'';position:absolute;width:100px;height:100px;
+background:rgba(255,255,255,.3);border-radius:50%;
+transform:scale(0);animation:ripple .4s linear
 }
-
-.input-wrapper input{
-  flex:1;
-  border:none;
-  outline:none;
-  background:transparent;
-  color:white;
-  font-size:15px;
+@keyframes ripple{to{transform:scale(3);opacity:0}}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+.typing{
+font-size:13px;opacity:.6;margin:4px 10px;
+display:none
 }
-
-/* ICON STYLE */
-.icon-btn{
-  width:28px;
-  height:28px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  opacity:.9;
-  transition:.2s;
+.dots::after{
+content:'...';animation:blink 1s infinite
 }
-
-.icon-btn:hover{
-  transform:scale(1.1);
+@keyframes blink{0%{opacity:0}50%{opacity:1}100%{opacity:0}}
+.replyBar{
+background:#1e2a35;color:white;
+padding:6px 10px;font-size:13px;
+display:none
 }
-
-.icon-btn svg{
-  fill:#4fc3f7;
-  width:22px;
-  height:22px;
+.reactionBox{
+position:absolute;bottom:100%;background:#1e2a35;
+padding:4px 8px;border-radius:20px;
+display:flex;gap:6px;font-size:18px;
 }
-
-.send-btn{
-  background:#4fc3f7;
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  transition:.2s;
-}
-
-.send-btn:hover{
-  transform:scale(1.08);
-}
-
-.send-btn svg{
-  fill:white;
-  width:20px;
-}
-
-/* EMOJI PANEL */
-.emoji-panel{
-  display:none;
-  background:#111;
-  padding:8px;
-  font-size:22px;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-.emoji-panel span{
-  cursor:pointer;
-  margin:5px;
-  transition:.2s;
-}
-
-.emoji-panel span:hover{
-  transform:scale(1.2);
-}
-
-/* ANIMATION */
-@keyframes slideIn{
-  from{opacity:0;transform:translateX(20px);}
-  to{opacity:1;transform:translateX(0);}
-}
+.reactionBox span{cursor:pointer}
+.blue{color:#4fc3f7}
 </style>
 </head>
 <body>
 
-<div class="chat-container">
+<div class="app">
+<div class="header">Aeyanz • online</div>
+<div class="chat" id="chat"></div>
 
-<div class="chat-header">
-<div class="avatar"></div>
-ZenixStore
+<div class="typing" id="typing">typing<span class="dots"></span></div>
+
+<div class="replyBar" id="replyBar"></div>
+
+<div class="input">
+<input id="text" placeholder="Message">
+<button onclick="send()">➤</button>
 </div>
-
-<div class="chat-box" id="chatBox"></div>
-
-<div class="emoji-panel" id="emojiPanel">
-<span>😂</span>
-<span>❤️</span>
-<span>🔥</span>
-<span>👍</span>
-<span>😎</span>
-<span>😭</span>
-<span>😡</span>
-</div>
-
-<div class="chat-input">
-<div class="input-wrapper">
-
-<div class="icon-btn" onclick="toggleEmoji()">
-<svg viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm-4-8c1.5 2 6.5 2 8 0"/></svg>
-</div>
-
-<input type="text" id="messageInput" placeholder="Message">
-
-<input type="file" id="imageInput" accept="image/*" hidden>
-
-<div class="icon-btn" onclick="openGallery()">
-<svg viewBox="0 0 24 24"><path d="M16 7l-1.4-1.4a2 2 0 0 0-2.8 0L3 14.4V21h6.6l8.8-8.8a2 2 0 0 0 0-2.8L16 7z"/></svg>
-</div>
-
-<div class="send-btn" onclick="sendMessage()">
-<svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-</div>
-
-</div>
-</div>
-
 </div>
 
 <script>
-const chatBox=document.getElementById("chatBox");
-const messageInput=document.getElementById("messageInput");
-const emojiPanel=document.getElementById("emojiPanel");
-const imageInput=document.getElementById("imageInput");
+const chat=document.getElementById("chat");
+const input=document.getElementById("text");
+const typing=document.getElementById("typing");
+const replyBar=document.getElementById("replyBar");
+let replyText=null;
 
-function getTime(){
-const now=new Date();
-return now.getHours().toString().padStart(2,'0')+":"+
-now.getMinutes().toString().padStart(2,'0');
+function time(){
+const d=new Date();
+return d.getHours().toString().padStart(2,'0')+':'+
+d.getMinutes().toString().padStart(2,'0');
 }
 
-function toggleEmoji(){
-emojiPanel.style.display=
-emojiPanel.style.display==="flex"?"none":"flex";
+function scrollDown(){chat.scrollTop=chat.scrollHeight;}
+
+function create(text,type="me"){
+const wrap=document.createElement("div");
+wrap.className="msg "+type;
+
+const bubble=document.createElement("div");
+bubble.className="bubble";
+
+if(text.startsWith("img:")){
+const img=document.createElement("img");
+img.src=text.replace("img:","");
+bubble.appendChild(img);
+bubble.style.padding="4px";
+}else{
+bubble.innerHTML=text;
 }
 
-emojiPanel.querySelectorAll("span").forEach(e=>{
-e.onclick=()=>messageInput.value+=e.textContent;
-});
-
-function applyReadEffect(checkEl){
-setTimeout(()=>{checkEl.innerHTML="✓✓";},800);
-setTimeout(()=>{checkEl.style.color="#4fc3f7";},1500);
+if(replyText){
+const reply=document.createElement("div");
+reply.style.fontSize="12px";
+reply.style.opacity=".6";
+reply.innerText=replyText;
+bubble.prepend(reply);
+replyText=null;
+replyBar.style.display="none";
 }
 
-function createMeta(){
 const meta=document.createElement("div");
 meta.className="meta";
-const time=document.createElement("span");
-time.textContent=getTime();
-const check=document.createElement("span");
-check.className="check";
-check.textContent="✓";
-meta.appendChild(time);
-meta.appendChild(check);
-applyReadEffect(check);
-return meta;
-}
+meta.innerHTML=`<span>${time()}</span><span class="check">✔✔</span>`;
+bubble.appendChild(meta);
 
-function sendMessage(){
-const text=messageInput.value.trim();
-if(text==="")return;
+wrap.appendChild(bubble);
+chat.appendChild(wrap);
 
-const msg=document.createElement("div");
-msg.className="message sent";
-msg.innerHTML=text;
-msg.appendChild(createMeta());
-
-chatBox.appendChild(msg);
-chatBox.scrollTop=chatBox.scrollHeight;
-messageInput.value="";
-emojiPanel.style.display="none";
-}
-
-function openGallery(){imageInput.click();}
-
-imageInput.addEventListener("change",function(){
-const file=this.files[0];
-if(!file)return;
-const reader=new FileReader();
-reader.onload=function(e){
-const msg=document.createElement("div");
-msg.className="message sent";
-const img=document.createElement("img");
-img.src=e.target.result;
-img.className="chat-img";
-msg.appendChild(img);
-msg.appendChild(createMeta());
-chatBox.appendChild(msg);
-chatBox.scrollTop=chatBox.scrollHeight;
-};
-reader.readAsDataURL(file);
+requestAnimationFrame(()=>{
+if(bubble.scrollHeight<42)bubble.classList.add("short");
 });
 
-messageInput.addEventListener("keypress",e=>{
-if(e.key==="Enter")sendMessage();
+setTimeout(()=>{
+meta.querySelector(".check").classList.add("blue");
+},1200);
+
+bubble.addEventListener("contextmenu",e=>{
+e.preventDefault();
+showReaction(bubble);
+});
+
+let hold;
+bubble.addEventListener("mousedown",()=>{
+hold=setTimeout(()=>wrap.remove(),600);
+});
+bubble.addEventListener("mouseup",()=>clearTimeout(hold));
+
+bubble.addEventListener("click",()=>{
+replyText=bubble.innerText;
+replyBar.innerText="Replying to: "+replyText;
+replyBar.style.display="block";
+});
+
+scrollDown();
+}
+
+function showReaction(bubble){
+const box=document.createElement("div");
+box.className="reactionBox";
+["❤️","😂","🔥","👍"].forEach(e=>{
+const span=document.createElement("span");
+span.innerText=e;
+span.onclick=()=>{
+bubble.append(" "+e);
+box.remove();
+};
+box.appendChild(span);
+});
+bubble.appendChild(box);
+setTimeout(()=>box.remove(),3000);
+}
+
+function send(){
+const val=input.value.trim();
+if(!val)return;
+create(val,"me");
+input.value="";
+typing.style.display="block";
+setTimeout(()=>{
+typing.style.display="none";
+create("Auto reply: "+val,"other");
+},1500);
+}
+
+input.addEventListener("keypress",e=>{
+if(e.key==="Enter")send();
 });
 </script>
 
