@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MC Chat System</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<title>MC System Chat</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{
-font-family:'Inter',-apple-system,BlinkMacSystemFont;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
 background:url('https://res.cloudinary.com/dtdodhqqi/image/upload/v1771310542/c36725a5a2a254a5df8c7dd4bdaa05af_v3tzna.jpg');
 background-size:cover;
 height:100vh;
@@ -25,14 +23,7 @@ max-width:430px;
 height:100vh;
 display:flex;
 flex-direction:column;
-backdrop-filter:blur(18px);
-}
-
-.header{
-padding:14px;
-font-weight:600;
-color:white;
-background:#0f1720;
+backdrop-filter:blur(12px);
 }
 
 .chat{
@@ -42,9 +33,9 @@ padding:12px;
 scroll-behavior:smooth;
 }
 
-.message{
+.msg{
 display:flex;
-margin:6px 0;
+margin:4px 0;
 animation:fade .15s ease;
 }
 
@@ -53,88 +44,80 @@ animation:fade .15s ease;
 
 .bubble{
 position:relative;
-background:#1f2c39;
-color:white;
+max-width:78%;
 padding:8px 10px;
 border-radius:14px;
-max-width:75%;
 font-size:15px;
-line-height:1.4;
+line-height:1.35;
 word-wrap:break-word;
 }
 
 .me .bubble{
-background:#2b6cb0;
+background:#1f6f5c;
+color:white;
 border-bottom-right-radius:5px;
-}
-
-.other .bubble{
-border-bottom-left-radius:5px;
 }
 
 .meta{
 font-size:11px;
 opacity:.8;
 display:flex;
-align-items:center;
 gap:4px;
-margin-top:3px;
+align-items:center;
 justify-content:flex-end;
+margin-top:3px;
 }
 
 .inline{
 display:inline-flex;
-align-items:center;
 gap:4px;
-margin-left:6px;
 font-size:11px;
 opacity:.8;
+margin-left:6px;
 }
 
-.check{
-color:#3ba4ff;
-}
+.check{color:#4fc3f7}
 
 img.chat-img{
-max-width:100%;
-border-radius:6px;
 display:block;
+max-width:100%;
+border-radius:8px; /* KECIL */
 }
 
 .input-area{
 display:flex;
 align-items:center;
 padding:8px;
-background:#0f1720;
+background:rgba(0,0,0,.6);
 gap:8px;
 }
 
-.icon-btn{
-width:34px;
-height:34px;
+.icon{
+width:36px;
+height:36px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:18px;
-cursor:pointer;
+font-size:20px;
 color:white;
+cursor:pointer;
 }
 
 input{
 flex:1;
-background:#1f2c39;
+background:#1e1e1e;
 border:none;
 outline:none;
 color:white;
 padding:10px 14px;
-border-radius:20px;
-font-size:14px;
+border-radius:22px;
+font-size:15px;
 }
 
 .send{
-background:#2b6cb0;
 width:38px;
 height:38px;
+background:#2b6cb0;
 border-radius:50%;
 display:flex;
 align-items:center;
@@ -143,22 +126,25 @@ color:white;
 cursor:pointer;
 }
 
-.context{
-position:absolute;
-background:#1c2733;
-border-radius:12px;
+.context-menu{
+position:fixed;
+background:#1e1e1e;
+border-radius:14px;
 padding:6px 0;
-box-shadow:0 5px 20px rgba(0,0,0,.4);
-z-index:99;
+width:160px;
+box-shadow:0 10px 30px rgba(0,0,0,.6);
+animation:scaleIn .15s ease;
+z-index:999;
 }
 
-.context div{
-padding:8px 16px;
+.context-menu div{
+padding:10px 16px;
+color:white;
 font-size:14px;
 cursor:pointer;
 }
 
-.context div:hover{
+.context-menu div:hover{
 background:#2b6cb0;
 }
 
@@ -166,45 +152,50 @@ background:#2b6cb0;
 from{opacity:0;transform:translateY(6px)}
 to{opacity:1;transform:translateY(0)}
 }
+
+@keyframes scaleIn{
+from{transform:scale(.8);opacity:0}
+to{transform:scale(1);opacity:1}
+}
 </style>
 </head>
 
 <body>
 
 <div class="app">
-<div class="header">MC Room</div>
 <div class="chat" id="chat"></div>
 
 <div class="input-area">
-<div class="icon-btn" onclick="toggleEmoji()">😊</div>
-<div class="icon-btn">
-<label for="imgUpload">📎</label>
-<input type="file" id="imgUpload" hidden accept="image/*">
+<div class="icon">😊</div>
+<div class="icon">
+<label for="img">📎</label>
+<input type="file" id="img" hidden accept="image/*">
 </div>
 <input type="text" id="text" placeholder="Message">
 <div class="send" onclick="send()">➤</div>
 </div>
-
 </div>
 
 <script>
 const chat=document.getElementById("chat");
 const input=document.getElementById("text");
-const imgUpload=document.getElementById("imgUpload");
+const imgInput=document.getElementById("img");
 
-function time(){
+function getTime(){
 const d=new Date();
 return d.getHours().toString().padStart(2,'0')+":"+
 d.getMinutes().toString().padStart(2,'0');
 }
 
-function createMessage(content,type="me",isImage=false){
+function createMessage(content,isImage=false){
 
 const wrap=document.createElement("div");
-wrap.className="message "+type;
+wrap.className="msg me";
 
 const bubble=document.createElement("div");
 bubble.className="bubble";
+
+let textNode;
 
 if(isImage){
 const img=document.createElement("img");
@@ -214,23 +205,24 @@ bubble.appendChild(img);
 
 const meta=document.createElement("div");
 meta.className="meta";
-meta.innerHTML=`${time()} <span class="check">✔✔</span>`;
+meta.innerHTML=`${getTime()} <span class="check">✔✔</span>`;
 bubble.appendChild(meta);
+
 }else{
 
-const textSpan=document.createElement("span");
-textSpan.innerText=content;
-bubble.appendChild(textSpan);
+textNode=document.createElement("span");
+textNode.innerText=content;
+bubble.appendChild(textNode);
 
-if(content.length<40){
+if(content.length<45 && !content.includes("\n")){
 const inline=document.createElement("span");
 inline.className="inline";
-inline.innerHTML=`${time()} <span class="check">✔✔</span>`;
+inline.innerHTML=`${getTime()} <span class="check">✔✔</span>`;
 bubble.appendChild(inline);
 }else{
 const meta=document.createElement("div");
 meta.className="meta";
-meta.innerHTML=`${time()} <span class="check">✔✔</span>`;
+meta.innerHTML=`${getTime()} <span class="check">✔✔</span>`;
 bubble.appendChild(meta);
 }
 }
@@ -239,52 +231,69 @@ wrap.appendChild(bubble);
 chat.appendChild(wrap);
 chat.scrollTop=chat.scrollHeight;
 
-bubble.oncontextmenu=(e)=>{
-e.preventDefault();
-showMenu(e.pageX,e.pageY,bubble,textSpan);
-};
+/* LONG PRESS */
+let pressTimer;
+bubble.addEventListener("touchstart",startPress);
+bubble.addEventListener("mousedown",startPress);
+
+bubble.addEventListener("touchend",cancelPress);
+bubble.addEventListener("mouseup",cancelPress);
+
+function startPress(e){
+pressTimer=setTimeout(()=>{
+showMenu(e,bubble,textNode);
+},500);
 }
 
-function showMenu(x,y,bubble,textSpan){
+function cancelPress(){
+clearTimeout(pressTimer);
+}
+}
+
+function showMenu(e,bubble,textNode){
 removeMenu();
+
 const menu=document.createElement("div");
-menu.className="context";
-menu.style.left=x+"px";
-menu.style.top=y+"px";
+menu.className="context-menu";
 
 menu.innerHTML=`
-<div onclick="editMsg(this)">Edit</div>
-<div onclick="copyMsg(this)">Copy</div>
-<div onclick="deleteMsg(this)">Delete</div>
+<div onclick="editMsg()">Edit</div>
+<div onclick="copyMsg()">Copy</div>
+<div onclick="deleteMsg()">Delete</div>
 `;
 
 document.body.appendChild(menu);
 
+menu.style.left=(e.touches?e.touches[0].pageX:e.pageX)+"px";
+menu.style.top=(e.touches?e.touches[0].pageY:e.pageY)+"px";
+
 menu.bubble=bubble;
-menu.textSpan=textSpan;
+menu.textNode=textNode;
 }
 
 function removeMenu(){
-const old=document.querySelector(".context");
+const old=document.querySelector(".context-menu");
 if(old) old.remove();
 }
 
-function deleteMsg(el){
-el.parentElement.bubble.parentElement.remove();
+function deleteMsg(){
+const menu=document.querySelector(".context-menu");
+menu.bubble.parentElement.remove();
 removeMenu();
 }
 
-function copyMsg(el){
-navigator.clipboard.writeText(el.parentElement.bubble.innerText);
+function copyMsg(){
+const menu=document.querySelector(".context-menu");
+navigator.clipboard.writeText(menu.bubble.innerText);
 removeMenu();
 }
 
-function editMsg(el){
-const bubble=el.parentElement.bubble;
-const text=bubble.querySelector("span");
-const newText=prompt("Edit message:",text.innerText);
+function editMsg(){
+const menu=document.querySelector(".context-menu");
+if(!menu.textNode) return;
+const newText=prompt("Edit message:",menu.textNode.innerText);
 if(newText){
-text.innerText=newText;
+menu.textNode.innerText=newText;
 }
 removeMenu();
 }
@@ -292,22 +301,21 @@ removeMenu();
 function send(){
 const val=input.value.trim();
 if(!val) return;
-createMessage(val,"me");
+createMessage(val,false);
 input.value="";
 }
 
-imgUpload.onchange=(e)=>{
+imgInput.onchange=e=>{
 const file=e.target.files[0];
 if(!file) return;
 const reader=new FileReader();
-reader.onload=function(ev){
-createMessage(ev.target.result,"me",true);
+reader.onload=ev=>{
+createMessage(ev.target.result,true);
 };
 reader.readAsDataURL(file);
 };
 
 document.body.onclick=removeMenu;
-
 </script>
 
 </body>
