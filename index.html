@@ -2,215 +2,195 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>MC AryanzUtama</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zenix Chat</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-body{
+*{
   margin:0;
-  font-family: Arial, sans-serif;
-  background: url("https://res.cloudinary.com/dtdodhqqi/image/upload/v1768802294/c6690caf0ff598a60ae714931b491f62_1_mv91ik.jpg");
-  background-size: cover;
-  color:#000;
+  padding:0;
+  box-sizing:border-box;
 }
 
-.container{
-  max-width:420px;
-  margin:auto;
+body{
+  font-family:'Inter', sans-serif;
+  background:#0f172a;
   height:100vh;
-  background:#e5ddd5;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.chat-container{
+  width:100%;
+  max-width:420px;
+  height:95vh;
+  background:#111827;
+  border-radius:20px;
+  overflow:hidden;
   display:flex;
   flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
 }
 
-header{
-  background:#075e54;
-  color:white;
-  padding:10px;
-  font-weight:bold;
-}
-
-#form{
+/* HEADER */
+.chat-header{
   padding:15px;
-}
-
-input,select,button{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border-radius:5px;
-  border:1px solid #ccc;
-}
-
-button{
-  background:#25d366;
+  background:#1f2937;
   color:white;
-  border:none;
-  font-weight:bold;
-}
-
-#chatBox{
-  flex:1;
-  padding:10px;
-  overflow-y:auto;
-}
-
-.bubble{
-  max-width:75%;
-  padding:8px;
-  margin:6px 0;
-  border-radius:8px;
-  font-size:14px;
-}
-
-.me{
-  background:#dcf8c6;
-  margin-left:auto;
-}
-
-.other{
-  background:white;
-}
-
-.time{
-  font-size:10px;
-  text-align:right;
-  color:#666;
-}
-
-.footer{
+  font-weight:600;
   display:flex;
-  padding:8px;
-  background:#f0f0f0;
+  align-items:center;
+  gap:10px;
 }
 
-.footer input{
-  flex:1;
+.avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#3b82f6,#06b6d4);
 }
+
+/* CHAT AREA */
+.chat-box{
+  flex:1;
+  padding:15px;
+  overflow-y:auto;
+  scroll-behavior:smooth;
+  background:#0f172a;
+}
+
+.message{
+  max-width:75%;
+  padding:10px 14px;
+  margin-bottom:10px;
+  border-radius:18px;
+  font-size:14px;
+  line-height:1.4;
+  animation:fadeIn .2s ease;
+}
+
+.sent{
+  background:#2563eb;
+  color:white;
+  margin-left:auto;
+  border-bottom-right-radius:5px;
+}
+
+.received{
+  background:#1e293b;
+  color:white;
+  border-bottom-left-radius:5px;
+}
+
+/* INPUT AREA */
+.chat-input{
+  padding:10px;
+  background:#1f2937;
+  display:flex;
+  gap:10px;
+}
+
+.chat-input input{
+  flex:1;
+  padding:10px 15px;
+  border-radius:20px;
+  border:none;
+  outline:none;
+  background:#111827;
+  color:white;
+}
+
+.chat-input button{
+  background:#3b82f6;
+  border:none;
+  color:white;
+  padding:10px 16px;
+  border-radius:20px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.chat-input button:hover{
+  background:#2563eb;
+}
+
+/* Scrollbar */
+.chat-box::-webkit-scrollbar{
+  width:4px;
+}
+.chat-box::-webkit-scrollbar-thumb{
+  background:#374151;
+  border-radius:10px;
+}
+
+/* Animation */
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(5px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
 </style>
 </head>
-
 <body>
-<div class="container">
 
-<header id="header">MC AryanzUtama</header>
+<div class="chat-container">
 
-<div id="form">
-  <input id="name" placeholder="Nama">
-  <select id="role">
-    <option value="BUYER">BUYER</option>
-    <option value="SELLER">SELLER</option>
-  </select>
-  <input id="nominal" placeholder="Nominal">
-
-  <button onclick="buatRoom()">BUAT ROOM</button>
-
-  <hr>
-
-  <input id="roomCode" placeholder="Room Code">
-  <button onclick="masukRoom()">MASUK ROOM</button>
-</div>
-
-<div id="room" style="display:none;flex:1;flex-direction:column">
-  <div id="chatBox"></div>
-
-  <div class="footer">
-    <input id="msg" placeholder="Ketik pesan">
-    <button onclick="kirim()">KIRIM</button>
+  <div class="chat-header">
+    <div class="avatar"></div>
+    Zenix Chat
   </div>
-</div>
+
+  <div class="chat-box" id="chatBox">
+    <div class="message received">Halo 👋</div>
+    <div class="message sent">Halo juga</div>
+  </div>
+
+  <div class="chat-input">
+    <input type="text" id="messageInput" placeholder="Ketik pesan...">
+    <button onclick="sendMessage()">Kirim</button>
+  </div>
 
 </div>
 
 <script>
-const GAS = "https://script.google.com/macros/s/AKfycbx61YG_IOw9Hlk_VJwNiOQmFhbpeFFwRau1EJHttnyJY4KmlKIu6jo23WVZbSCZLfvJ6w/exec";
-let token = "";
-let roleUser = "";
+const chatBox = document.getElementById("chatBox");
+const messageInput = document.getElementById("messageInput");
 
-function buatRoom(){
-  fetch(GAS,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      action:"createRoom",
-      nominal:nominal.value
-    })
-  })
-  .then(r=>r.json())
-  .then(d=>{
-    if(!d.roomCode){
-      alert("Gagal buat room");
-      return;
-    }
-    roomCode.value = d.roomCode;
-    alert("ROOM CODE: "+d.roomCode);
-  });
+function sendMessage(){
+  const text = messageInput.value.trim();
+  if(text === "") return;
+
+  const message = document.createElement("div");
+  message.classList.add("message","sent");
+  message.innerText = text;
+
+  chatBox.appendChild(message);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  messageInput.value = "";
+
+  setTimeout(()=>{
+    autoReply();
+  },600);
 }
 
-function masukRoom(){
-  roleUser = role.value;
+function autoReply(){
+  const reply = document.createElement("div");
+  reply.classList.add("message","received");
+  reply.innerText = "Pesan diterima ✅";
 
-  fetch(GAS,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      action:"joinRoom",
-      roomCode:roomCode.value,
-      name:name.value,
-      role:role.value
-    })
-  })
-  .then(r=>r.json())
-  .then(d=>{
-    if(!d.success){
-      alert("Room tidak ditemukan");
-      return;
-    }
-    token = d.token;
-    document.getElementById("form").style.display="none";
-    document.getElementById("room").style.display="flex";
-    loadChat();
-    setInterval(loadChat,1500);
-  });
+  chatBox.appendChild(reply);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function kirim(){
-  if(!msg.value.trim()) return;
-
-  fetch(GAS,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      action:"sendChat",
-      token:token,
-      from:roleUser,
-      text:msg.value
-    })
-  });
-
-  msg.value="";
-}
-
-function loadChat(){
-  fetch(GAS,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      action:"getChat",
-      token:token
-    })
-  })
-  .then(r=>r.json())
-  .then(d=>{
-    chatBox.innerHTML="";
-    (d.chat||[]).forEach(c=>{
-      let div=document.createElement("div");
-      div.className="bubble "+(c.from===roleUser?"me":"other");
-      div.innerHTML=`<b>${c.from}</b><br>${c.text}<div class="time">${c.time}</div>`;
-      chatBox.appendChild(div);
-    });
-    chatBox.scrollTop=chatBox.scrollHeight;
-  });
-}
+messageInput.addEventListener("keypress", function(e){
+  if(e.key === "Enter"){
+    sendMessage();
+  }
+});
 </script>
 
 </body>
