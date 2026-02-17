@@ -1,22 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MC System</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+/* ================= RESET ================= */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
+}
+
 html,body{
 height:100%;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Emoji","Apple Color Emoji",sans-serif;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple Color Emoji","Segoe UI Emoji",sans-serif;
 background:url("https://res.cloudinary.com/dtdodhqqi/image/upload/v1771310542/c36725a5a2a254a5df8c7dd4bdaa05af_v3tzna.jpg") center/cover no-repeat fixed;
 color:white;
 overflow:hidden;
 }
-.app{height:100%;display:flex;flex-direction:column;}
-.chat{flex:1;overflow-y:auto;padding:14px;scroll-behavior:smooth;}
-.msg{display:flex;margin:4px 0;justify-content:flex-end;}
+
+/* ================= APP ================= */
+
+.app{
+height:100%;
+display:flex;
+flex-direction:column;
+}
+
+/* ================= CHAT ================= */
+
+.chat{
+flex:1;
+overflow-y:auto;
+padding:14px;
+scroll-behavior:smooth;
+}
+
+.msg{
+display:flex;
+margin:6px 0;
+justify-content:flex-end;
+}
+
+/* ================= BUBBLE ================= */
+
 .bubble{
 max-width:78%;
 padding:8px 12px;
@@ -27,76 +59,224 @@ background:#1f6f5c;
 border-bottom-right-radius:6px;
 position:relative;
 word-wrap:break-word;
-transform:scale(.9) translateY(10px);
+transform:scale(.95) translateY(8px);
 opacity:0;
 animation:msgIn .25s cubic-bezier(.22,1,.36,1) forwards;
 transition:.2s;
 }
-@keyframes msgIn{to{transform:scale(1) translateY(0);opacity:1}}
-.bubble.hold{transform:scale(1.03) translateY(-2px);}
-.meta{font-size:11px;opacity:.85;display:flex;justify-content:flex-end;gap:4px;margin-top:3px;}
-.check{color:#4fc3f7}
-.edited{font-size:10px;opacity:.6;margin-left:4px;}
-.deleted{opacity:.55;font-style:italic;}
-img.chat-img{display:block;max-width:100%;border-radius:1.5px;}
 
-/* EDIT BAR */
-.edit-bar{
+@keyframes msgIn{
+to{
+transform:scale(1) translateY(0);
+opacity:1;
+}
+}
+
+.bubble.hold{
+transform:scale(1.03);
+}
+
+/* ================= INLINE META ================= */
+
+.meta{
+font-size:11px;
+opacity:.85;
+display:flex;
+justify-content:flex-end;
+gap:4px;
+margin-top:4px;
+}
+
+.inline-meta{
+display:inline-flex;
+gap:4px;
+font-size:11px;
+opacity:.85;
+margin-left:6px;
+}
+
+.check{
+color:#4fc3f7;
+}
+
+.edited{
+font-size:10px;
+opacity:.6;
+margin-left:4px;
+}
+
+.deleted{
+opacity:.55;
+font-style:italic;
+}
+
+/* ================= IMAGE ================= */
+
+img.chat-img{
+display:block;
+max-width:100%;
+border-radius:2px;
+}
+
+/* ================= INPUT ================= */
+
+.input-area{
+display:flex;
+align-items:center;
+padding:8px;
+background:rgba(0,0,0,.85);
+gap:8px;
+backdrop-filter:blur(12px);
+}
+
+.icon{
+width:36px;
+height:36px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:22px;
+cursor:pointer;
+transition:.15s;
+}
+
+.icon:active{transform:scale(.9)}
+
+input{
+flex:1;
+background:#1e1e1e;
+border:none;
+outline:none;
+color:white;
+padding:12px 16px;
+border-radius:26px;
+font-size:15px;
+}
+
+.send{
+width:42px;
+height:42px;
+background:#2b6cb0;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+font-size:18px;
+transition:.15s;
+}
+
+.send:active{transform:scale(.85)}
+
+/* ================= OVERLAY MENU ================= */
+
+.overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.5);
+backdrop-filter:blur(6px);
+display:flex;
+align-items:center;
+justify-content:center;
+animation:fade .2s ease;
+z-index:999;
+}
+
+@keyframes fade{
+from{opacity:0}
+to{opacity:1}
+}
+
+.menu{
+background:#1e1e1e;
+border-radius:20px;
+width:240px;
+overflow:hidden;
+animation:menuIn .25s cubic-bezier(.22,1,.36,1);
+}
+
+@keyframes menuIn{
+from{transform:scale(.7);opacity:0}
+to{transform:scale(1);opacity:1}
+}
+
+.menu div{
+padding:16px;
+text-align:center;
+border-bottom:1px solid rgba(255,255,255,.05);
+cursor:pointer;
+}
+
+.menu div:last-child{border:none}
+.menu div:active{background:#2b6cb0}
+
+/* ================= EMOJI ================= */
+
+.emoji-box{
+position:absolute;
+bottom:-260px;
+left:10px;
+background:#1e1e1e;
+border-radius:20px;
+padding:12px;
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+width:240px;
+transition:.3s cubic-bezier(.22,1,.36,1);
+}
+
+.emoji-box.show{bottom:70px}
+
+.emoji-box span{
+font-size:22px;
+cursor:pointer;
+transition:.1s;
+}
+
+.emoji-box span:active{transform:scale(.8)}
+
+/* ================= REPLY BAR ================= */
+
+.reply-bar{
 background:#1c1c1c;
-padding:8px 14px;
+padding:8px 12px;
 font-size:13px;
 display:flex;
 justify-content:space-between;
 align-items:center;
 animation:slideDown .2s ease;
 }
-@keyframes slideDown{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
-.cancel-edit{cursor:pointer;opacity:.7}
 
-/* INPUT */
-.input-area{
-display:flex;align-items:center;padding:8px;background:rgba(0,0,0,.8);
-gap:8px;backdrop-filter:blur(10px);
+@keyframes slideDown{
+from{transform:translateY(-10px);opacity:0}
+to{transform:translateY(0);opacity:1}
 }
-.icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;transition:.15s;}
-.icon:active{transform:scale(.9)}
-input{
-flex:1;background:#1e1e1e;border:none;outline:none;color:white;
-padding:12px 16px;border-radius:26px;font-size:15px;
-}
-.send{
-width:42px;height:42px;background:#2b6cb0;border-radius:50%;
-display:flex;align-items:center;justify-content:center;
-cursor:pointer;font-size:18px;transition:.15s;
-}
-.send:active{transform:scale(.85)}
 
-/* MENU */
-.overlay{
-position:fixed;inset:0;background:rgba(0,0,0,.5);
-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;
-z-index:999;
+.reply-close{
+cursor:pointer;
+opacity:.7;
 }
-.menu{
-background:#1e1e1e;border-radius:20px;width:240px;overflow:hidden;
-animation:menuIn .25s cubic-bezier(.22,1,.36,1);
-}
-@keyframes menuIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
-.menu div{padding:16px;text-align:center;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;}
-.menu div:last-child{border:none}
-.menu div:active{background:#2b6cb0}
+
 </style>
 </head>
 
 <body>
+
 <div class="app">
 
-<div id="editContainer"></div>
+<div id="replyContainer"></div>
 
 <div class="chat" id="chat"></div>
 
+<div class="emoji-box" id="emojiBox"></div>
+
 <div class="input-area">
-<div class="icon">😊</div>
+<div class="icon" onclick="toggleEmoji()">😊</div>
+<div class="icon">
+<label for="img">📎</label>
+<input type="file" id="img" hidden accept="image/*">
+</div>
 <input type="text" id="text" placeholder="Message">
 <div class="send" id="sendBtn" onclick="handleSend()">➤</div>
 </div>
@@ -104,15 +284,39 @@ animation:menuIn .25s cubic-bezier(.22,1,.36,1);
 </div>
 
 <script>
+
+/* ================= VARIABLES ================= */
+
 const chat=document.getElementById("chat");
 const input=document.getElementById("text");
+const emojiBox=document.getElementById("emojiBox");
+const imgInput=document.getElementById("img");
 const sendBtn=document.getElementById("sendBtn");
-const editContainer=document.getElementById("editContainer");
+const replyContainer=document.getElementById("replyContainer");
 
 let editTarget=null;
+let replyTarget=null;
 
-/* KEEP KEYBOARD OPEN */
+/* ================= KEYBOARD ================= */
+
 chat.addEventListener("click",()=>input.blur());
+
+/* ================= EMOJI ================= */
+
+const emojis=["😀","😂","😍","🥶","🔥","😎","😭","😡","🤯","👍","🙏","🎉","💸","🚀","❤️","😴","😏","🥵"];
+
+emojis.forEach(e=>{
+let span=document.createElement("span");
+span.innerText=e;
+span.onclick=()=>input.value+=e;
+emojiBox.appendChild(span);
+});
+
+function toggleEmoji(){
+emojiBox.classList.toggle("show");
+}
+
+/* ================= TIME ================= */
 
 function getTime(){
 const d=new Date();
@@ -120,45 +324,114 @@ return d.getHours().toString().padStart(2,'0')+":"+
 d.getMinutes().toString().padStart(2,'0');
 }
 
-function createMessage(content){
+/* ================= CREATE MESSAGE ================= */
+
+function createMessage(content,isImage=false){
+
 const wrap=document.createElement("div");
 wrap.className="msg";
 
 const bubble=document.createElement("div");
 bubble.className="bubble";
 
-const textNode=document.createElement("span");
+let textNode;
+
+if(replyTarget){
+let reply=document.createElement("div");
+reply.style.fontSize="12px";
+reply.style.opacity=".6";
+reply.style.marginBottom="4px";
+reply.innerText=replyTarget;
+bubble.appendChild(reply);
+}
+
+if(isImage){
+const img=document.createElement("img");
+img.src=content;
+img.className="chat-img";
+bubble.appendChild(img);
+}else{
+textNode=document.createElement("span");
 textNode.innerText=content;
+bubble.appendChild(textNode);
+}
 
 const meta=document.createElement("div");
 meta.className="meta";
-meta.innerHTML=`${getTime()} <span class="check">✔✔</span>`;
 
-bubble.appendChild(textNode);
+if(!isImage && content.length<35){
+meta.classList.add("inline-meta");
 bubble.appendChild(meta);
+meta.innerHTML=`${getTime()} <span class="check">✔✔</span>`;
+}else{
+meta.innerHTML=`${getTime()} <span class="check">✔✔</span>`;
+bubble.appendChild(meta);
+}
 
 wrap.appendChild(bubble);
 chat.appendChild(wrap);
 chat.scrollTop=chat.scrollHeight;
 
 /* LONG PRESS */
-let timer;
-bubble.addEventListener("touchstart",start);
-bubble.addEventListener("mousedown",start);
-bubble.addEventListener("mouseup",cancel);
-bubble.addEventListener("touchend",cancel);
 
-function start(){
+let timer;
+bubble.addEventListener("mousedown",startHold);
+bubble.addEventListener("touchstart",startHold);
+bubble.addEventListener("mouseup",cancelHold);
+bubble.addEventListener("touchend",cancelHold);
+
+function startHold(){
 bubble.classList.add("hold");
 timer=setTimeout(()=>showMenu(bubble,textNode),450);
 }
-function cancel(){
+function cancelHold(){
 bubble.classList.remove("hold");
 clearTimeout(timer);
 }
+
+/* SWIPE REPLY */
+
+let startX=0;
+bubble.addEventListener("touchstart",(e)=>{
+startX=e.touches[0].clientX;
+});
+bubble.addEventListener("touchmove",(e)=>{
+let diff=e.touches[0].clientX-startX;
+if(diff>0 && diff<120){
+bubble.style.transform=`translateX(${diff}px)`;
+}
+});
+bubble.addEventListener("touchend",(e)=>{
+let diff=e.changedTouches[0].clientX-startX;
+bubble.style.transform="";
+if(diff>80 && textNode){
+activateReply(textNode.innerText);
+}
+});
+
 }
 
+/* ================= REPLY ================= */
+
+function activateReply(text){
+replyTarget=text;
+replyContainer.innerHTML=`
+<div class="reply-bar">
+<span>Replying: ${text}</span>
+<span class="reply-close" onclick="cancelReply()">✕</span>
+</div>
+`;
+}
+
+function cancelReply(){
+replyTarget=null;
+replyContainer.innerHTML="";
+}
+
+/* ================= MENU ================= */
+
 function showMenu(bubble,textNode){
+
 const overlay=document.createElement("div");
 overlay.className="overlay";
 
@@ -176,11 +449,17 @@ document.body.appendChild(overlay);
 
 overlay.bubble=bubble;
 overlay.textNode=textNode;
+
 overlay.onclick=e=>{if(e.target===overlay) overlay.remove();}
+
 }
+
+/* ================= EDIT ================= */
 
 function startEdit(){
 const overlay=document.querySelector(".overlay");
+if(!overlay.textNode) return;
+
 editTarget={
 bubble:overlay.bubble,
 textNode:overlay.textNode
@@ -190,22 +469,10 @@ input.value=editTarget.textNode.innerText;
 input.focus();
 sendBtn.innerText="✔";
 
-editContainer.innerHTML=`
-<div class="edit-bar">
-<span>Mengedit pesan</span>
-<span class="cancel-edit" onclick="cancelEdit()">Batal</span>
-</div>
-`;
-
 overlay.remove();
 }
 
-function cancelEdit(){
-editTarget=null;
-input.value="";
-sendBtn.innerText="➤";
-editContainer.innerHTML="";
-}
+/* ================= DELETE ================= */
 
 function deleteMsg(){
 const overlay=document.querySelector(".overlay");
@@ -220,13 +487,19 @@ bubble.style.opacity="1";
 overlay.remove();
 }
 
+/* ================= COPY ================= */
+
 function copyMsg(){
 const overlay=document.querySelector(".overlay");
+if(overlay.textNode)
 navigator.clipboard.writeText(overlay.textNode.innerText);
 overlay.remove();
 }
 
+/* ================= SEND ================= */
+
 function handleSend(){
+
 const val=input.value.trim();
 if(!val) return;
 
@@ -234,19 +507,36 @@ if(editTarget){
 editTarget.textNode.innerText=val;
 
 if(!editTarget.bubble.querySelector(".edited")){
-const edited=document.createElement("span");
+let edited=document.createElement("span");
 edited.className="edited";
 edited.innerText="edited";
 editTarget.bubble.querySelector(".meta").appendChild(edited);
 }
 
-cancelEdit();
-}else{
-createMessage(val);
+editTarget=null;
+sendBtn.innerText="➤";
+input.value="";
+return;
+}
+
+createMessage(val,false);
 input.value="";
 input.focus();
+emojiBox.classList.remove("show");
+cancelReply();
+
 }
-}
+
+/* ================= IMAGE ================= */
+
+imgInput.onchange=e=>{
+const file=e.target.files[0];
+if(!file) return;
+const reader=new FileReader();
+reader.onload=ev=>createMessage(ev.target.result,true);
+reader.readAsDataURL(file);
+};
+
 </script>
 
 </body>
