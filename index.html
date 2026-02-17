@@ -50,15 +50,14 @@ background:#1f6f5c;
 border-bottom-right-radius:6px;
 position:relative;
 word-wrap:break-word;
-transform:scale(.85) translateY(10px);
+transform:scale(.9) translateY(10px);
 opacity:0;
 animation:msgIn .25s cubic-bezier(.22,1,.36,1) forwards;
 transition:.2s;
 }
 
-/* Lift effect on hold */
 .bubble.hold{
-transform:scale(1.02) translateY(-2px);
+transform:scale(1.03) translateY(-2px);
 }
 
 @keyframes msgIn{
@@ -85,6 +84,17 @@ opacity:.85;
 margin-left:6px;
 }
 
+.edited{
+font-size:10px;
+opacity:.6;
+margin-left:4px;
+}
+
+.deleted{
+opacity:.55;
+font-style:italic;
+}
+
 .check{color:#4fc3f7}
 
 img.chat-img{
@@ -93,7 +103,7 @@ max-width:100%;
 border-radius:1.5px;
 }
 
-/* INPUT AREA */
+/* INPUT */
 .input-area{
 display:flex;
 align-items:center;
@@ -140,11 +150,9 @@ font-size:18px;
 transition:.15s;
 }
 
-.send:active{
-transform:scale(.85);
-}
+.send:active{transform:scale(.85)}
 
-/* CENTER MENU */
+/* MENU */
 .overlay{
 position:fixed;
 inset:0;
@@ -168,10 +176,7 @@ animation:menuIn .25s cubic-bezier(.22,1,.36,1) forwards;
 }
 
 @keyframes menuIn{
-to{
-transform:scale(1);
-opacity:1;
-}
+to{transform:scale(1);opacity:1}
 }
 
 .menu div{
@@ -185,7 +190,7 @@ transition:.15s;
 .menu div:last-child{border:none}
 .menu div:active{background:#2b6cb0}
 
-/* EMOJI PANEL */
+/* EMOJI */
 .emoji-box{
 position:absolute;
 bottom:-260px;
@@ -200,9 +205,7 @@ width:240px;
 transition:.3s cubic-bezier(.22,1,.36,1);
 }
 
-.emoji-box.show{
-bottom:70px;
-}
+.emoji-box.show{bottom:70px}
 
 .emoji-box span{
 font-size:22px;
@@ -210,9 +213,7 @@ cursor:pointer;
 transition:.1s;
 }
 
-.emoji-box span:active{
-transform:scale(.8);
-}
+.emoji-box span:active{transform:scale(.8)}
 
 @keyframes fade{
 from{opacity:0}
@@ -225,7 +226,6 @@ to{opacity:1}
 
 <div class="app">
 <div class="chat" id="chat"></div>
-
 <div class="emoji-box" id="emojiBox"></div>
 
 <div class="input-area">
@@ -244,6 +244,8 @@ const chat=document.getElementById("chat");
 const input=document.getElementById("text");
 const imgInput=document.getElementById("img");
 const emojiBox=document.getElementById("emojiBox");
+
+chat.addEventListener("click",()=>input.blur());
 
 const emojis=["😀","😂","😍","🥶","🔥","😎","😭","😡","🤯","👍","🙏","🎉","💸","🚀","❤️","😴","😏","🥵"];
 
@@ -279,29 +281,16 @@ const img=document.createElement("img");
 img.src=content;
 img.className="chat-img";
 bubble.appendChild(img);
-
-const meta=document.createElement("div");
-meta.className="meta";
-meta.innerHTML=`${getTime()} <span class="check">✔✔</span>`;
-bubble.appendChild(meta);
-
 }else{
 textNode=document.createElement("span");
 textNode.innerText=content;
 bubble.appendChild(textNode);
+}
 
-if(content.length<45 && !content.includes("\n")){
-const inline=document.createElement("span");
-inline.className="inline";
-inline.innerHTML=`${getTime()} <span class="check">✔✔</span>`;
-bubble.appendChild(inline);
-}else{
 const meta=document.createElement("div");
 meta.className="meta";
 meta.innerHTML=`${getTime()} <span class="check">✔✔</span>`;
 bubble.appendChild(meta);
-}
-}
 
 wrap.appendChild(bubble);
 chat.appendChild(wrap);
@@ -347,7 +336,14 @@ overlay.onclick=e=>{if(e.target===overlay) overlay.remove();}
 
 function deleteMsg(){
 const overlay=document.querySelector(".overlay");
-overlay.bubble.parentElement.remove();
+const bubble=overlay.bubble;
+
+bubble.style.opacity="0";
+setTimeout(()=>{
+bubble.innerHTML="<span class='deleted'>Pesan telah dihapus</span>";
+bubble.style.opacity="1";
+},200);
+
 overlay.remove();
 }
 
@@ -360,16 +356,37 @@ overlay.remove();
 
 function editMsg(){
 const overlay=document.querySelector(".overlay");
-if(!overlay.textNode) return;
-const newText=prompt("Edit message:",overlay.textNode.innerText);
-if(newText) overlay.textNode.innerText=newText;
+const bubble=overlay.bubble;
+const textNode=overlay.textNode;
+if(!textNode) return;
+
+input.value=textNode.innerText;
+input.focus();
+
 overlay.remove();
+
+input.onkeydown=function(e){
+if(e.key==="Enter"){
+e.preventDefault();
+textNode.innerText=input.value;
+
+let edited=document.createElement("span");
+edited.className="edited";
+edited.innerText="edited";
+
+bubble.querySelector(".meta").appendChild(edited);
+
+input.value="";
+input.onkeydown=null;
+}
+}
 }
 
 function send(){
 const val=input.value.trim();
 if(!val) return;
 createMessage(val,false);
+input.focus(); // keyboard tetap buka
 input.value="";
 emojiBox.classList.remove("show");
 }
