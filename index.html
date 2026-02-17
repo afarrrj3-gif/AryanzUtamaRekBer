@@ -56,7 +56,6 @@ body{
   background-size:cover;
   background-position:center;
   scroll-behavior:smooth;
-
   display:flex;
   flex-direction:column;
   gap:8px;
@@ -64,14 +63,13 @@ body{
 
 /* MESSAGE */
 .message{
-  position:relative;
-  padding:8px 12px 18px 12px;
+  display:inline-block;
+  max-width:75%;
+  padding:8px 12px;
   border-radius:18px;
   font-size:14px;
   line-height:1.4;
   word-wrap:break-word;
-  max-width:75%;
-  width:fit-content;
   animation:fadeIn .2s ease;
 }
 
@@ -89,35 +87,41 @@ body{
   border-bottom-left-radius:4px;
 }
 
+/* META INSIDE FLEX */
 .meta{
-  position:absolute;
-  bottom:4px;
-  right:8px;
-  font-size:10px;
-  opacity:.85;
-  display:flex;
-  gap:4px;
+  display:inline-flex;
   align-items:center;
+  gap:4px;
+  font-size:11px;
+  opacity:.85;
+  margin-left:6px;
 }
 
 .check{
-  font-size:11px;
   transition:.3s;
+}
+
+/* IMAGE FIX */
+.chat-img{
+  max-width:240px;
+  border-radius:14px;
+  display:block;
+  margin-bottom:6px;
 }
 
 /* INPUT TELEGRAM STYLE */
 .chat-input{
-  background:#111b21;
-  padding:10px;
+  background:#0f0f0f;
+  padding:8px;
 }
 
 .input-wrapper{
-  background:#202c33;
+  background:#1f1f1f;
   border-radius:30px;
   display:flex;
   align-items:center;
-  padding:6px 10px;
-  gap:8px;
+  padding:6px 12px;
+  gap:10px;
 }
 
 .input-wrapper input{
@@ -126,38 +130,36 @@ body{
   outline:none;
   background:transparent;
   color:white;
-  font-size:14px;
+  font-size:15px;
 }
 
-.circle-btn{
-  background:#2a3942;
+.icon{
+  background:none;
   border:none;
-  color:white;
-  width:38px;
-  height:38px;
-  border-radius:50%;
+  font-size:22px;
   cursor:pointer;
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:.2s;
+  color:#4fc3f7;
 }
 
-.circle-btn:hover{
-  background:#324b57;
+.send-mic{
+  background:#4fc3f7;
+  color:white;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
 }
 
-.send-btn{
-  background:#00a884;
-}
-
-.send-btn:hover{
-  background:#008069;
-}
-
+/* EMOJI PANEL */
 .emoji-panel{
   display:none;
-  background:#111b21;
+  background:#111;
   padding:8px;
   font-size:22px;
   flex-wrap:wrap;
@@ -172,12 +174,6 @@ body{
 
 .emoji-panel span:hover{
   transform:scale(1.2);
-}
-
-img.chat-img{
-  max-width:100%;
-  border-radius:12px;
-  margin-bottom:12px;
 }
 
 @keyframes fadeIn{
@@ -209,11 +205,11 @@ img.chat-img{
 
   <div class="chat-input">
     <div class="input-wrapper">
-      <button class="circle-btn" onclick="toggleEmoji()">😊</button>
+      <button class="icon" onclick="toggleEmoji()">😊</button>
       <input type="text" id="messageInput" placeholder="Message">
       <input type="file" id="imageInput" accept="image/*" hidden>
-      <button class="circle-btn" onclick="openGallery()">📎</button>
-      <button class="circle-btn send-btn" onclick="sendMessage()">➤</button>
+      <button class="icon" onclick="openGallery()">📎</button>
+      <div class="send-mic" onclick="sendMessage()">➤</div>
     </div>
   </div>
 
@@ -240,66 +236,71 @@ emojiPanel.querySelectorAll("span").forEach(e=>{
   e.onclick=()=> messageInput.value += e.textContent;
 });
 
-function applyReadEffect(msg){
-  setTimeout(()=>{
-    msg.querySelector(".check").innerHTML="✓✓";
-  },800);
+function applyReadEffect(checkEl){
+  setTimeout(()=>{ checkEl.innerHTML="✓✓"; },800);
+  setTimeout(()=>{ checkEl.style.color="#4fc3f7"; },1500);
+}
 
-  setTimeout(()=>{
-    msg.querySelector(".check").style.color="#4fc3f7";
-  },1500);
+function createMeta(){
+  const meta=document.createElement("span");
+  meta.className="meta";
+  const time=document.createElement("span");
+  time.textContent=getTime();
+  const check=document.createElement("span");
+  check.className="check";
+  check.textContent="✓";
+  meta.appendChild(time);
+  meta.appendChild(check);
+  applyReadEffect(check);
+  return meta;
 }
 
 function sendMessage(){
-  const text = messageInput.value.trim();
+  const text=messageInput.value.trim();
   if(text==="") return;
 
-  const msg = document.createElement("div");
+  const msg=document.createElement("div");
   msg.className="message sent";
-  msg.innerHTML=`
-    ${text}
-    <div class="meta">
-      ${getTime()}
-      <span class="check">✓</span>
-    </div>
-  `;
+
+  const textNode=document.createElement("span");
+  textNode.textContent=text;
+
+  msg.appendChild(textNode);
+  msg.appendChild(createMeta());
 
   chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
+  chatBox.scrollTop=chatBox.scrollHeight;
   messageInput.value="";
   emojiPanel.style.display="none";
-
-  applyReadEffect(msg);
 }
 
 function openGallery(){
   imageInput.click();
 }
 
-imageInput.addEventListener("change", function(){
-  const file = this.files[0];
+imageInput.addEventListener("change",function(){
+  const file=this.files[0];
   if(!file) return;
 
-  const reader = new FileReader();
-  reader.onload = function(e){
-    const msg = document.createElement("div");
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const msg=document.createElement("div");
     msg.className="message sent";
-    msg.innerHTML=`
-      <img src="${e.target.result}" class="chat-img">
-      <div class="meta">
-        ${getTime()}
-        <span class="check">✓</span>
-      </div>
-    `;
-    chatBox.appendChild(msg);
-    chatBox.scrollTop = chatBox.scrollHeight;
 
-    applyReadEffect(msg);
+    const img=document.createElement("img");
+    img.src=e.target.result;
+    img.className="chat-img";
+
+    msg.appendChild(img);
+    msg.appendChild(createMeta());
+
+    chatBox.appendChild(msg);
+    chatBox.scrollTop=chatBox.scrollHeight;
   };
   reader.readAsDataURL(file);
 });
 
-messageInput.addEventListener("keypress", e=>{
+messageInput.addEventListener("keypress",e=>{
   if(e.key==="Enter") sendMessage();
 });
 </script>
