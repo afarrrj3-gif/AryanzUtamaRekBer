@@ -8,14 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;}
 body{
-  font-family:'Inter', sans-serif;
+  font-family:'Inter',sans-serif;
   height:100vh;
   display:flex;
   justify-content:center;
@@ -23,7 +18,6 @@ body{
   background:#000;
 }
 
-/* CHAT WRAPPER */
 .chat-container{
   width:100%;
   max-width:420px;
@@ -35,7 +29,6 @@ body{
   box-shadow:0 20px 60px rgba(0,0,0,0.6);
 }
 
-/* HEADER */
 .chat-header{
   background:#111b21;
   color:white;
@@ -53,7 +46,6 @@ body{
   background:linear-gradient(135deg,#00a884,#008069);
 }
 
-/* CHAT AREA */
 .chat-box{
   flex:1;
   padding:15px;
@@ -64,7 +56,6 @@ body{
   scroll-behavior:smooth;
 }
 
-/* MESSAGE STYLE */
 .message{
   max-width:75%;
   padding:8px 12px;
@@ -89,7 +80,6 @@ body{
   border-bottom-left-radius:4px;
 }
 
-/* TIME & CHECK */
 .meta{
   font-size:10px;
   opacity:.7;
@@ -105,12 +95,12 @@ body{
   font-size:11px;
 }
 
-/* INPUT */
 .chat-input{
   background:#111b21;
   padding:10px;
   display:flex;
-  gap:10px;
+  gap:8px;
+  align-items:center;
 }
 
 .chat-input input{
@@ -123,26 +113,40 @@ body{
   color:white;
 }
 
-.chat-input button{
+.icon-btn{
   background:#00a884;
   border:none;
   color:white;
-  padding:10px 16px;
-  border-radius:20px;
+  padding:10px;
+  border-radius:50%;
   cursor:pointer;
   transition:.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-.chat-input button:hover{
+.icon-btn:hover{
   background:#008069;
 }
 
-.chat-box::-webkit-scrollbar{
-  width:4px;
+.emoji-panel{
+  display:none;
+  background:#111b21;
+  padding:8px;
+  font-size:20px;
+  gap:10px;
 }
-.chat-box::-webkit-scrollbar-thumb{
-  background:#555;
+
+.emoji-panel span{
+  cursor:pointer;
+  margin:5px;
+}
+
+img.chat-img{
+  max-width:100%;
   border-radius:10px;
+  margin-top:5px;
 }
 
 @keyframes fadeIn{
@@ -160,12 +164,24 @@ body{
     ZenixStore
   </div>
 
-  <div class="chat-box" id="chatBox">
+  <div class="chat-box" id="chatBox"></div>
+
+  <div class="emoji-panel" id="emojiPanel">
+    <span>😂</span>
+    <span>❤️</span>
+    <span>🔥</span>
+    <span>👍</span>
+    <span>😎</span>
+    <span>😭</span>
+    <span>😡</span>
   </div>
 
   <div class="chat-input">
+    <button class="icon-btn" onclick="toggleEmoji()">😊</button>
     <input type="text" id="messageInput" placeholder="Ketik pesan...">
-    <button onclick="sendMessage()">Kirim</button>
+    <input type="file" id="imageInput" accept="image/*" hidden>
+    <button class="icon-btn" onclick="openGallery()">📷</button>
+    <button class="icon-btn" onclick="sendMessage()">➤</button>
   </div>
 
 </div>
@@ -173,17 +189,28 @@ body{
 <script>
 const chatBox = document.getElementById("chatBox");
 const messageInput = document.getElementById("messageInput");
+const emojiPanel = document.getElementById("emojiPanel");
+const imageInput = document.getElementById("imageInput");
 
 function getTime(){
   const now = new Date();
-  let h = now.getHours().toString().padStart(2,'0');
-  let m = now.getMinutes().toString().padStart(2,'0');
-  return h + ":" + m;
+  return now.getHours().toString().padStart(2,'0') + ":" +
+         now.getMinutes().toString().padStart(2,'0');
 }
+
+function toggleEmoji(){
+  emojiPanel.style.display =
+    emojiPanel.style.display === "flex" ? "none" : "flex";
+  emojiPanel.style.flexWrap="wrap";
+}
+
+emojiPanel.querySelectorAll("span").forEach(e=>{
+  e.onclick=()=> messageInput.value += e.textContent;
+});
 
 function sendMessage(){
   const text = messageInput.value.trim();
-  if(text === "") return;
+  if(text==="") return;
 
   const msg = document.createElement("div");
   msg.classList.add("message","sent");
@@ -197,34 +224,53 @@ function sendMessage(){
 
   chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
-  messageInput.value = "";
+  messageInput.value="";
+  emojiPanel.style.display="none";
 
-  // Change to double check after 1s
   setTimeout(()=>{
-    msg.querySelector(".check").innerHTML = "✓✓";
-  },1000);
+    msg.querySelector(".check").innerHTML="✓✓";
+  },800);
 
-  // Auto reply simulation
   setTimeout(()=>{
-    autoReply();
+    msg.querySelector(".check").style.color="#4fc3f7";
   },1500);
 }
 
-function autoReply(){
-  const reply = document.createElement("div");
-  reply.classList.add("message","received");
-  reply.innerHTML = `
-    Pesan diterima ✅
-    <div class="meta">${getTime()}</div>
-  `;
-  chatBox.appendChild(reply);
-  chatBox.scrollTop = chatBox.scrollHeight;
+function openGallery(){
+  imageInput.click();
 }
 
-messageInput.addEventListener("keypress", function(e){
-  if(e.key === "Enter"){
-    sendMessage();
-  }
+imageInput.addEventListener("change", function(){
+  const file = this.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const msg = document.createElement("div");
+    msg.classList.add("message","sent");
+    msg.innerHTML = `
+      <img src="${e.target.result}" class="chat-img">
+      <div class="meta">
+        ${getTime()}
+        <span class="check">✓</span>
+      </div>
+    `;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    setTimeout(()=>{
+      msg.querySelector(".check").innerHTML="✓✓";
+    },800);
+
+    setTimeout(()=>{
+      msg.querySelector(".check").style.color="#4fc3f7";
+    },1500);
+  };
+  reader.readAsDataURL(file);
+});
+
+messageInput.addEventListener("keypress", e=>{
+  if(e.key==="Enter") sendMessage();
 });
 </script>
 
