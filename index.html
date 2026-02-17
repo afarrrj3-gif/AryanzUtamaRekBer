@@ -10,9 +10,9 @@
 
 html,body{
 height:100%;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-background:url("https://res.cloudinary.com/dtdodhqqi/image/upload/v1771310542/c36725a5a2a254a5df8c7dd4bdaa05af_v3tzna.jpg") no-repeat center center fixed;
-background-size:cover;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Emoji","Apple Color Emoji",sans-serif;
+background:url("https://res.cloudinary.com/dtdodhqqi/image/upload/v1771310542/c36725a5a2a254a5df8c7dd4bdaa05af_v3tzna.jpg") center/cover no-repeat fixed;
+color:white;
 }
 
 .app{
@@ -24,28 +24,27 @@ flex-direction:column;
 .chat{
 flex:1;
 overflow-y:auto;
-padding:10px;
+padding:12px;
 }
 
 .msg{
 display:flex;
-margin:3px 0;
+margin:4px 0;
 animation:fade .15s ease;
 }
 
 .me{justify-content:flex-end}
 
 .bubble{
-position:relative;
 max-width:78%;
-padding:7px 10px;
-border-radius:16px;
+padding:8px 12px;
+border-radius:18px;
 font-size:15px;
-line-height:1.35;
-word-wrap:break-word;
+line-height:1.4;
 background:#1f6f5c;
-color:white;
-border-bottom-right-radius:5px;
+border-bottom-right-radius:6px;
+position:relative;
+word-wrap:break-word;
 }
 
 .inline{
@@ -70,25 +69,24 @@ margin-top:3px;
 img.chat-img{
 display:block;
 max-width:100%;
-border-radius:4px;   /* FIXED SUPER KECIL */
+border-radius:2px; /* SUPER TIPIS */
 }
 
 .input-area{
 display:flex;
 align-items:center;
 padding:8px;
-background:rgba(0,0,0,.75);
+background:rgba(0,0,0,.8);
 gap:8px;
 }
 
 .icon{
-width:34px;
-height:34px;
+width:36px;
+height:36px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:20px;
-color:white;
+font-size:22px;
 cursor:pointer;
 }
 
@@ -98,51 +96,79 @@ background:#1e1e1e;
 border:none;
 outline:none;
 color:white;
-padding:10px 14px;
-border-radius:22px;
+padding:12px 16px;
+border-radius:26px;
 font-size:15px;
 }
 
 .send{
-width:38px;
-height:38px;
+width:42px;
+height:42px;
 background:#2b6cb0;
 border-radius:50%;
 display:flex;
 align-items:center;
 justify-content:center;
-color:white;
 cursor:pointer;
+font-size:18px;
 }
 
-.context-menu{
+/* CENTER MENU */
+.overlay{
 position:fixed;
-background:#1e1e1e;
-border-radius:14px;
-padding:6px 0;
-width:160px;
-box-shadow:0 10px 30px rgba(0,0,0,.6);
-animation:scaleIn .15s ease;
+inset:0;
+background:rgba(0,0,0,.4);
+display:flex;
+align-items:center;
+justify-content:center;
+animation:fade .15s ease;
 z-index:999;
 }
 
-.context-menu div{
-padding:10px 16px;
-color:white;
-font-size:14px;
+.menu{
+background:#1e1e1e;
+border-radius:18px;
+width:220px;
+overflow:hidden;
+animation:scale .15s ease;
+}
+
+.menu div{
+padding:14px;
+text-align:center;
+border-bottom:1px solid rgba(255,255,255,.05);
 cursor:pointer;
 }
 
-.context-menu div:hover{
-background:#2b6cb0;
+.menu div:last-child{border:none}
+.menu div:hover{background:#2b6cb0}
+
+/* EMOJI PICKER */
+.emoji-box{
+position:absolute;
+bottom:70px;
+left:10px;
+background:#1e1e1e;
+border-radius:16px;
+padding:10px;
+display:none;
+flex-wrap:wrap;
+gap:6px;
+width:220px;
+animation:scale .15s ease;
+}
+
+.emoji-box span{
+font-size:22px;
+cursor:pointer;
 }
 
 @keyframes fade{
-from{opacity:0;transform:translateY(6px)}
-to{opacity:1;transform:translateY(0)}
+from{opacity:0}
+to{opacity:1}
 }
 
-@keyframes scaleIn{
+@keyframes scale{
 from{transform:scale(.8);opacity:0}
 to{transform:scale(1);opacity:1}
 }
@@ -154,8 +180,10 @@ to{transform:scale(1);opacity:1}
 <div class="app">
 <div class="chat" id="chat"></div>
 
+<div class="emoji-box" id="emojiBox"></div>
+
 <div class="input-area">
-<div class="icon">😊</div>
+<div class="icon" onclick="toggleEmoji()">😊</div>
 <div class="icon">
 <label for="img">📎</label>
 <input type="file" id="img" hidden accept="image/*">
@@ -169,6 +197,20 @@ to{transform:scale(1);opacity:1}
 const chat=document.getElementById("chat");
 const input=document.getElementById("text");
 const imgInput=document.getElementById("img");
+const emojiBox=document.getElementById("emojiBox");
+
+const emojis=["😀","😂","😍","🥶","🔥","😎","😭","😡","🤯","👍","🙏","🎉","💸","🚀","❤️"];
+
+emojis.forEach(e=>{
+let span=document.createElement("span");
+span.innerText=e;
+span.onclick=()=>{input.value+=e};
+emojiBox.appendChild(span);
+});
+
+function toggleEmoji(){
+emojiBox.style.display=emojiBox.style.display==="flex"?"none":"flex";
+}
 
 function getTime(){
 const d=new Date();
@@ -198,7 +240,6 @@ meta.innerHTML=`${getTime()} <span class="check">✔✔</span>`;
 bubble.appendChild(meta);
 
 }else{
-
 textNode=document.createElement("span");
 textNode.innerText=content;
 bubble.appendChild(textNode);
@@ -220,60 +261,66 @@ wrap.appendChild(bubble);
 chat.appendChild(wrap);
 chat.scrollTop=chat.scrollHeight;
 
-/* LONG PRESS */
+/* LONG PRESS CENTER */
 let pressTimer;
-bubble.addEventListener("touchstart",startPress);
-bubble.addEventListener("mousedown",startPress);
-bubble.addEventListener("touchend",cancelPress);
-bubble.addEventListener("mouseup",cancelPress);
+bubble.addEventListener("touchstart",start);
+bubble.addEventListener("mousedown",start);
+bubble.addEventListener("mouseup",cancel);
+bubble.addEventListener("touchend",cancel);
 
-function startPress(e){
-pressTimer=setTimeout(()=>{
-showMenu(e,bubble,textNode);
-},500);
+function start(){
+pressTimer=setTimeout(()=>showMenu(bubble,textNode),500);
 }
-function cancelPress(){clearTimeout(pressTimer);}
+function cancel(){clearTimeout(pressTimer);}
 }
 
-function showMenu(e,bubble,textNode){
+function showMenu(bubble,textNode){
 removeMenu();
+
+const overlay=document.createElement("div");
+overlay.className="overlay";
+
 const menu=document.createElement("div");
-menu.className="context-menu";
+menu.className="menu";
+
 menu.innerHTML=`
 <div onclick="editMsg()">Edit</div>
 <div onclick="copyMsg()">Copy</div>
 <div onclick="deleteMsg()">Delete</div>
 `;
-document.body.appendChild(menu);
-menu.style.left=(e.touches?e.touches[0].pageX:e.pageX)+"px";
-menu.style.top=(e.touches?e.touches[0].pageY:e.pageY)+"px";
-menu.bubble=bubble;
-menu.textNode=textNode;
+
+overlay.appendChild(menu);
+document.body.appendChild(overlay);
+
+overlay.bubble=bubble;
+overlay.textNode=textNode;
+overlay.onclick=e=>{if(e.target===overlay) removeMenu();}
 }
 
 function removeMenu(){
-const old=document.querySelector(".context-menu");
+const old=document.querySelector(".overlay");
 if(old) old.remove();
 }
 
 function deleteMsg(){
-const menu=document.querySelector(".context-menu");
-menu.bubble.parentElement.remove();
+const overlay=document.querySelector(".overlay");
+overlay.bubble.parentElement.remove();
 removeMenu();
 }
 
 function copyMsg(){
-const menu=document.querySelector(".context-menu");
-navigator.clipboard.writeText(menu.bubble.innerText);
+const overlay=document.querySelector(".overlay");
+if(overlay.textNode)
+navigator.clipboard.writeText(overlay.textNode.innerText);
 removeMenu();
 }
 
 function editMsg(){
-const menu=document.querySelector(".context-menu");
-if(!menu.textNode) return;
-const newText=prompt("Edit message:",menu.textNode.innerText);
+const overlay=document.querySelector(".overlay");
+if(!overlay.textNode) return;
+const newText=prompt("Edit message:",overlay.textNode.innerText);
 if(newText){
-menu.textNode.innerText=newText;
+overlay.textNode.innerText=newText;
 }
 removeMenu();
 }
@@ -283,19 +330,16 @@ const val=input.value.trim();
 if(!val) return;
 createMessage(val,false);
 input.value="";
+emojiBox.style.display="none";
 }
 
 imgInput.onchange=e=>{
 const file=e.target.files[0];
 if(!file) return;
 const reader=new FileReader();
-reader.onload=ev=>{
-createMessage(ev.target.result,true);
-};
+reader.onload=ev=>createMessage(ev.target.result,true);
 reader.readAsDataURL(file);
 };
-
-document.body.onclick=removeMenu;
 </script>
 
 </body>
