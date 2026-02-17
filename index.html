@@ -9,6 +9,7 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
+
 body{
   font-family:'Inter',sans-serif;
   height:100vh;
@@ -54,47 +55,56 @@ body{
   background-size:cover;
   background-position:center;
   scroll-behavior:smooth;
+
+  display:flex;
+  flex-direction:column;
+  gap:6px;
 }
 
-.message {
-  display: inline-block;
-  position: relative;
-  padding: 8px 12px 18px 12px;
-  border-radius: 18px;
-  font-size: 14px;
-  line-height: 1.4;
-  word-wrap: break-word;
-  animation: fadeIn 0.2s ease;
-  max-width: 75%;
-  width: auto;
+/* MESSAGE BASE */
+.message{
+  display:inline-block;
+  position:relative;
+  padding:8px 12px 18px 12px;
+  border-radius:18px;
+  font-size:14px;
+  line-height:1.4;
+  word-wrap:break-word;
+  max-width:75%;
+  width:auto;
+  animation:fadeIn .2s ease;
 }
 
+/* SENT */
 .sent{
+  align-self:flex-end;
   background:#005c4b;
   color:white;
-  margin-left:auto;
   border-bottom-right-radius:4px;
 }
 
+/* RECEIVED */
 .received{
+  align-self:flex-start;
   background:#202c33;
   color:white;
   border-bottom-left-radius:4px;
 }
 
 .meta{
+  position:absolute;
+  bottom:4px;
+  right:8px;
   font-size:10px;
-  opacity:.7;
-  margin-top:3px;
-  text-align:right;
+  opacity:.8;
   display:flex;
-  justify-content:flex-end;
   gap:4px;
   align-items:center;
 }
 
 .check{
   font-size:11px;
+  transition:.3s;
 }
 
 .chat-input{
@@ -105,7 +115,7 @@ body{
   align-items:center;
 }
 
-.chat-input input{
+.chat-input input[type="text"]{
   flex:1;
   padding:10px 15px;
   border-radius:20px;
@@ -113,6 +123,7 @@ body{
   outline:none;
   background:#202c33;
   color:white;
+  font-size:14px;
 }
 
 .icon-btn{
@@ -136,24 +147,30 @@ body{
   display:none;
   background:#111b21;
   padding:8px;
-  font-size:20px;
+  font-size:22px;
+  flex-wrap:wrap;
   gap:10px;
 }
 
 .emoji-panel span{
   cursor:pointer;
   margin:5px;
+  transition:.2s;
+}
+
+.emoji-panel span:hover{
+  transform:scale(1.2);
 }
 
 img.chat-img{
   max-width:100%;
-  border-radius:10px;
-  margin-top:5px;
+  border-radius:12px;
+  margin-bottom:12px;
 }
 
 @keyframes fadeIn{
-  from{opacity:0; transform:translateY(5px);}
-  to{opacity:1; transform:translateY(0);}
+  from{opacity:0;transform:translateY(5px);}
+  to{opacity:1;transform:translateY(0);}
 }
 </style>
 </head>
@@ -203,20 +220,29 @@ function getTime(){
 function toggleEmoji(){
   emojiPanel.style.display =
     emojiPanel.style.display === "flex" ? "none" : "flex";
-  emojiPanel.style.flexWrap="wrap";
 }
 
 emojiPanel.querySelectorAll("span").forEach(e=>{
   e.onclick=()=> messageInput.value += e.textContent;
 });
 
+function applyReadEffect(msg){
+  setTimeout(()=>{
+    msg.querySelector(".check").innerHTML="✓✓";
+  },800);
+
+  setTimeout(()=>{
+    msg.querySelector(".check").style.color="#4fc3f7";
+  },1500);
+}
+
 function sendMessage(){
   const text = messageInput.value.trim();
   if(text==="") return;
 
   const msg = document.createElement("div");
-  msg.classList.add("message","sent");
-  msg.innerHTML = `
+  msg.className="message sent";
+  msg.innerHTML=`
     ${text}
     <div class="meta">
       ${getTime()}
@@ -229,13 +255,7 @@ function sendMessage(){
   messageInput.value="";
   emojiPanel.style.display="none";
 
-  setTimeout(()=>{
-    msg.querySelector(".check").innerHTML="✓✓";
-  },800);
-
-  setTimeout(()=>{
-    msg.querySelector(".check").style.color="#4fc3f7";
-  },1500);
+  applyReadEffect(msg);
 }
 
 function openGallery(){
@@ -249,8 +269,8 @@ imageInput.addEventListener("change", function(){
   const reader = new FileReader();
   reader.onload = function(e){
     const msg = document.createElement("div");
-    msg.classList.add("message","sent");
-    msg.innerHTML = `
+    msg.className="message sent";
+    msg.innerHTML=`
       <img src="${e.target.result}" class="chat-img">
       <div class="meta">
         ${getTime()}
@@ -260,13 +280,7 @@ imageInput.addEventListener("change", function(){
     chatBox.appendChild(msg);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    setTimeout(()=>{
-      msg.querySelector(".check").innerHTML="✓✓";
-    },800);
-
-    setTimeout(()=>{
-      msg.querySelector(".check").style.color="#4fc3f7";
-    },1500);
+    applyReadEffect(msg);
   };
   reader.readAsDataURL(file);
 });
