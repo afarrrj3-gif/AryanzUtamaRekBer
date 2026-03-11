@@ -2,58 +2,124 @@
 <html>
 <head>
 
-<title>Realtime Chat</title>
+<title>MC Chat</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#111;
+color:white;
+text-align:center;
+}
+
+#chat{
+display:none;
+}
+
+#messages{
+height:300px;
+overflow:auto;
+border:1px solid #444;
+padding:10px;
+margin-top:10px;
+text-align:left;
+}
+
+input,button{
+padding:10px;
+margin:5px;
+}
+
+</style>
 
 </head>
 
 <body>
 
-<h2>Realtime Chat</h2>
+<h2>MC Chat System</h2>
 
-Room Code
-<input id="room">
+<div id="menu">
 
-Nama
-<input id="name">
+<h3>Seller</h3>
 
-<button onclick="enterRoom()">Masuk Room</button>
+<input id="sellerName" placeholder="Nama Seller">
+
+<button onclick="createRoom()">Create Room</button>
 
 <hr>
 
-<div id="chat" style="display:none">
+<h3>Buyer</h3>
 
-<div id="messages" style="height:300px;overflow:auto;border:1px solid black"></div>
+<input id="buyerName" placeholder="Nama Buyer">
 
-<input id="msg">
+<input id="roomInput" placeholder="Room Code">
+
+<button onclick="joinRoom()">Join Room</button>
+
+</div>
+
+
+<div id="chat">
+
+<h3 id="roomTitle"></h3>
+
+<div id="messages"></div>
+
+<input id="msg" placeholder="Ketik pesan">
 
 <button onclick="sendMsg()">Send</button>
 
 </div>
+
 
 <script>
 
 const { createClient } = supabase
 
 const db = createClient(
-"https://cwpgfzqmxypscasngopc.supabase.co",
+"https://lmpbrrlhacfriuazrtok.supabase.co",
 "sb_publishable_1IojCH_Rna58hbUhTdR6bg_arFswmgw"
 )
 
 let room=""
 let name=""
 
-function enterRoom(){
+function createRoom(){
 
-room=document.getElementById("room").value
-name=document.getElementById("name").value
+name=document.getElementById("sellerName").value
+
+room=Math.floor(100000+Math.random()*900000).toString()
+
+alert("Room Code: "+room)
+
+startChat()
+
+}
+
+function joinRoom(){
+
+name=document.getElementById("buyerName").value
+
+room=document.getElementById("roomInput").value
+
+startChat()
+
+}
+
+function startChat(){
+
+document.getElementById("menu").style.display="none"
 
 document.getElementById("chat").style.display="block"
 
-listen()
+document.getElementById("roomTitle").innerText="Room: "+room
 
 loadMessages()
+
+listen()
 
 }
 
@@ -76,9 +142,13 @@ document.getElementById("msg").value=""
 async function loadMessages(){
 
 const {data}=await db
+
 .from("messages")
+
 .select("*")
+
 .eq("room",room)
+
 .order("created_at")
 
 data.forEach(addMsg)
