@@ -1,108 +1,28 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<title>MC Room</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-
-body{
-font-family:Arial;
-background:#0f0f0f;
-color:white;
-text-align:center;
-padding:40px;
-}
-
-.box{
-background:#1b1b1b;
-padding:25px;
-border-radius:10px;
-max-width:400px;
-margin:auto;
-margin-bottom:30px;
-}
-
-input,select,button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:6px;
-border:none;
-}
-
-button{
-background:#00bfff;
-color:white;
-cursor:pointer;
-}
-
-</style>
-</head>
-
-<body>
-
-<h1>MC Room</h1>
-
-<div class="box">
-
-<h2>Seller</h2>
-
-<input id="sellerName" placeholder="Nama">
-
-<input id="sellerWA" placeholder="WhatsApp 08xxxx">
-
-<input id="nominal" placeholder="Nominal">
-
-<select id="trxType">
-<option value="inc">Inc</option>
-<option value="exc">Exc</option>
-</select>
-
-<button onclick="createRoom()">Create Room</button>
-
-</div>
-
-
-<div class="box">
-
-<h2>Buyer</h2>
-
-<input id="buyerName" placeholder="Nama">
-
-<input id="buyerWA" placeholder="WhatsApp">
-
-<input id="roomCode" placeholder="Room Code">
-
-<button onclick="joinRoom()">Join Room</button>
-
-</div>
-
 
 <script>
 
-const SUPABASE_URL="https://lmpbrrlhacfriuazrtok.supabase.co"
+const { createClient } = supabase
 
-const SUPABASE_KEY="sb_publishable_ZyOAm9p6EXzOZobH-QNvbQ_7F4imDAF"
+const SUPABASE_URL = "https://lmpbrrlhacfriuazrtok.supabase.co"
+const SUPABASE_KEY = "sb_publishable_ZyOAm9p6EXzOZobH-QNvbQ_7F4imDAF"
 
-const supabase = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
-
-
-// CREATE ROOM
+const db = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 async function createRoom(){
 
-const code = Math.floor(100000+Math.random()*900000).toString()
+console.log("Create Room ditekan")
 
-const sellerName=document.getElementById("sellerName").value
-const sellerWA=document.getElementById("sellerWA").value
-const nominal=document.getElementById("nominal").value
-const trxType=document.getElementById("trxType").value
+const code = Math.floor(100000 + Math.random()*900000).toString()
 
-await supabase.from("rooms").insert([
+const sellerName = document.getElementById("sellerName").value
+const sellerWA = document.getElementById("sellerWA").value
+const nominal = document.getElementById("nominal").value
+const trxType = document.getElementById("trxType").value
 
+const { data, error } = await db
+.from("rooms")
+.insert([
 {
 room_code:code,
 seller_name:sellerName,
@@ -110,52 +30,19 @@ seller_wa:sellerWA,
 nominal:nominal,
 trx_type:trxType
 }
-
 ])
 
-window.location.href="room.html?code="+code+"&name="+sellerName
+if(error){
 
-}
-
-
-// JOIN ROOM
-
-async function joinRoom(){
-
-const code=document.getElementById("roomCode").value
-const name=document.getElementById("buyerName").value
-const wa=document.getElementById("buyerWA").value
-
-const {data}=await supabase
-.from("rooms")
-.select("*")
-.eq("room_code",code)
-.single()
-
-if(!data){
-
-alert("Room tidak ditemukan")
-
+alert("Error : " + error.message)
 return
 
 }
 
-await supabase.from("participants").insert([
+alert("Room dibuat : " + code)
 
-{
-room_code:code,
-name:name,
-role:"buyer",
-wa:wa
-}
-
-])
-
-window.location.href="room.html?code="+code+"&name="+name
+window.location.href = "room.html?code="+code+"&name="+sellerName
 
 }
 
 </script>
-
-</body>
-</html>
