@@ -1,77 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>MC Chat</title>
+
+<title>Realtime Chat</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-
-body{
-font-family:Arial;
-background:#111;
-color:white;
-text-align:center;
-}
-
-.container{
-max-width:500px;
-margin:auto;
-padding:20px;
-}
-
-input,button{
-width:100%;
-padding:10px;
-margin:5px 0;
-}
-
-#chat{
-display:none;
-}
-
-#messages{
-height:300px;
-overflow:auto;
-border:1px solid #333;
-padding:10px;
-text-align:left;
-margin-bottom:10px;
-}
-
-</style>
 </head>
 
 <body>
 
-<div class="container">
+<h2>Realtime Chat</h2>
 
-<h2>MC ROOM</h2>
+Room Code
+<input id="room">
 
-<div id="menu">
+Nama
+<input id="name">
 
-<h3>Seller</h3>
-<input id="sellerName" placeholder="Nama seller">
-<button onclick="createRoom()">Create Room</button>
+<button onclick="enterRoom()">Masuk Room</button>
 
-<h3>Buyer</h3>
-<input id="buyerName" placeholder="Nama buyer">
-<input id="roomInput" placeholder="Room code">
-<button onclick="joinRoom()">Join Room</button>
+<hr>
 
-</div>
+<div id="chat" style="display:none">
 
-<div id="chat">
+<div id="messages" style="height:300px;overflow:auto;border:1px solid black"></div>
 
-<h3 id="roomTitle"></h3>
+<input id="msg">
 
-<div id="messages"></div>
-
-<input id="msg" placeholder="ketik pesan">
 <button onclick="sendMsg()">Send</button>
-
-</div>
 
 </div>
 
@@ -80,71 +37,35 @@ margin-bottom:10px;
 const { createClient } = supabase
 
 const db = createClient(
-"https://lmpbrrlhacfriuazrtok.supabase.co",
-"sb_publishable_ZyOAm9p6EXzOZobH-QNvbQ_7F4imDAF"
+"https://cwpgfzqmxypscasngopc.supabase.co",
+"sb_publishable_1IojCH_Rna58hbUhTdR6bg_arFswmgw"
 )
 
 let room=""
 let name=""
 
-async function createRoom(){
+function enterRoom(){
 
-name=document.getElementById("sellerName").value
+room=document.getElementById("room").value
+name=document.getElementById("name").value
 
-room=Math.floor(100000+Math.random()*900000).toString()
-
-await db.from("rooms").insert({
-room_code:room,
-seller_name:name
-})
-
-start()
-
-}
-
-async function joinRoom(){
-
-name=document.getElementById("buyerName").value
-room=document.getElementById("roomInput").value
-
-const {data}=await db
-.from("rooms")
-.select("*")
-.eq("room_code",room)
-.single()
-
-if(!data){
-
-alert("room tidak ada")
-return
-
-}
-
-start()
-
-}
-
-function start(){
-
-document.getElementById("menu").style.display="none"
 document.getElementById("chat").style.display="block"
 
-document.getElementById("roomTitle").innerText="ROOM "+room
+listen()
 
 loadMessages()
-listen()
 
 }
 
 async function sendMsg(){
 
-let msg=document.getElementById("msg").value
+let text=document.getElementById("msg").value
 
 await db.from("messages").insert({
 
-room_code:room,
+room:room,
 sender:name,
-message:msg
+message:text
 
 })
 
@@ -157,7 +78,7 @@ async function loadMessages(){
 const {data}=await db
 .from("messages")
 .select("*")
-.eq("room_code",room)
+.eq("room",room)
 .order("created_at")
 
 data.forEach(addMsg)
@@ -176,7 +97,7 @@ document.getElementById("messages").appendChild(div)
 
 function listen(){
 
-db.channel("room-"+room)
+db.channel("chat-"+room)
 
 .on(
 "postgres_changes",
@@ -184,7 +105,7 @@ db.channel("room-"+room)
 event:"INSERT",
 schema:"public",
 table:"messages",
-filter:"room_code=eq."+room
+filter:"room=eq."+room
 },
 payload=>{
 
