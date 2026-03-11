@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>MC Room Chat</title>
+<title>MC Chat</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -10,50 +10,34 @@
 
 body{
 font-family:Arial;
-background:#0f0f0f;
+background:#111;
 color:white;
 text-align:center;
-padding:30px;
 }
 
 .container{
 max-width:500px;
 margin:auto;
-}
-
-.box{
-background:#1c1c1c;
 padding:20px;
-border-radius:10px;
-margin-bottom:20px;
 }
 
 input,button{
 width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:6px;
-border:none;
+padding:10px;
+margin:5px 0;
 }
 
-button{
-background:#00bfff;
-color:white;
-cursor:pointer;
-}
-
-#chatArea{
+#chat{
 display:none;
 }
 
 #messages{
 height:300px;
 overflow:auto;
-background:#111;
+border:1px solid #333;
 padding:10px;
-border-radius:6px;
-margin-bottom:10px;
 text-align:left;
+margin-bottom:10px;
 }
 
 </style>
@@ -63,166 +47,136 @@ text-align:left;
 
 <div class="container">
 
-<h1>MC Chat Room</h1>
+<h2>MC ROOM</h2>
 
 <div id="menu">
 
-<div class="box">
-
-<h2>Seller</h2>
-
-<input id="sellerName" placeholder="Nama Seller">
-
+<h3>Seller</h3>
+<input id="sellerName" placeholder="Nama seller">
 <button onclick="createRoom()">Create Room</button>
 
-</div>
-
-<div class="box">
-
-<h2>Buyer</h2>
-
-<input id="buyerName" placeholder="Nama Buyer">
-
-<input id="roomCodeInput" placeholder="Room Code">
-
+<h3>Buyer</h3>
+<input id="buyerName" placeholder="Nama buyer">
+<input id="roomInput" placeholder="Room code">
 <button onclick="joinRoom()">Join Room</button>
 
 </div>
 
-</div>
+<div id="chat">
 
-
-<div id="chatArea">
-
-<h2 id="roomTitle"></h2>
+<h3 id="roomTitle"></h3>
 
 <div id="messages"></div>
 
-<input id="msgInput" placeholder="Ketik pesan">
-
-<button onclick="sendMessage()">Kirim</button>
-
-</div>
+<input id="msg" placeholder="ketik pesan">
+<button onclick="sendMsg()">Send</button>
 
 </div>
 
+</div>
 
 <script>
 
 const { createClient } = supabase
 
-const SUPABASE_URL="https://lmpbrrlhacfriuazrtok.supabase.co"
-const SUPABASE_KEY="sb_publishable_ZyOAm9p6EXzOZobH-QNvbQ_7F4imDAF"
+const db = createClient(
+"https://lmpbrrlhacfriuazrtok.supabase.co",
+"sb_publishable_ZyOAm9p6EXzOZobH-QNvbQ_7F4imDAF"
+)
 
-const db=createClient(SUPABASE_URL,SUPABASE_KEY)
-
-let roomCode=""
-let userName=""
-
-
-// SELLER CREATE ROOM
+let room=""
+let name=""
 
 async function createRoom(){
 
-userName=document.getElementById("sellerName").value
+name=document.getElementById("sellerName").value
 
-if(!userName){
+room=Math.floor(100000+Math.random()*900000).toString()
 
-alert("Masukkan nama")
+await db.from("rooms").insert({
+room_code:room,
+seller_name:name
+})
 
-return
-
-}
-
-roomCode=Math.floor(100000+Math.random()*900000).toString()
-
-await db.from("rooms").insert([
-{
-room_code:roomCode,
-seller_name:userName
-}
-])
-
-startChat()
+start()
 
 }
-
-
-// BUYER JOIN ROOM
 
 async function joinRoom(){
 
-userName=document.getElementById("buyerName").value
-roomCode=document.getElementById("roomCodeInput").value
-
-if(!roomCode){
-
-alert("Masukkan code")
-
-return
-
-}
+name=document.getElementById("buyerName").value
+room=document.getElementById("roomInput").value
 
 const {data}=await db
 .from("rooms")
 .select("*")
-.eq("room_code",roomCode)
+.eq("room_code",room)
 .single()
 
 if(!data){
 
-alert("Room tidak ditemukan")
-
+alert("room tidak ada")
 return
 
 }
 
-startChat()
+start()
 
 }
 
-
-// START CHAT
-
-function startChat(){
+function start(){
 
 document.getElementById("menu").style.display="none"
+document.getElementById("chat").style.display="block"
 
-document.getElementById("chatArea").style.display="block"
+document.getElementById("roomTitle").innerText="ROOM "+room
 
-document.getElementById("roomTitle").innerText="Room : "+roomCode
-
-listenChat()
+loadMessages()
+listen()
 
 }
 
+async function sendMsg(){
 
-// SEND MESSAGE
+let msg=document.getElementById("msg").value
 
-async function sendMessage(){
+await db.from("messages").insert({
 
-const msg=document.getElementById("msgInput").value
-
-if(!msg) return
-
-await db.from("messages").insert([
-{
-room_code:roomCode,
-sender:userName,
+room_code:room,
+sender:name,
 message:msg
+
+})
+
+document.getElementById("msg").value=""
+
 }
-])
 
-document.getElementById("msgInput").value=""
+async function loadMessages(){
+
+const {data}=await db
+.from("messages")
+.select("*")
+.eq("room_code",room)
+.order("created_at")
+
+data.forEach(addMsg)
 
 }
 
+function addMsg(m){
 
-// REALTIME LISTENER
+let div=document.createElement("div")
 
-function listenChat(){
+div.innerText=m.sender+" : "+m.message
 
-db.channel("chat")
+document.getElementById("messages").appendChild(div)
+
+}
+
+function listen(){
+
+db.channel("room-"+room)
 
 .on(
 "postgres_changes",
@@ -230,19 +184,14 @@ db.channel("chat")
 event:"INSERT",
 schema:"public",
 table:"messages",
-filter:`room_code=eq.${roomCode}`
+filter:"room_code=eq."+room
 },
-(payload)=>{
+payload=>{
 
-const data=payload.new
+addMsg(payload.new)
 
-const div=document.createElement("div")
-
-div.innerText=data.sender+" : "+data.message
-
-document.getElementById("messages").appendChild(div)
-
-})
+}
+)
 
 .subscribe()
 
