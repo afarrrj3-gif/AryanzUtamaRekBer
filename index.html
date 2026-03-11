@@ -1,521 +1,331 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yanz Utama - MC Transaction</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AryanzUtama - MC</title>
 
-        :root {
-            --bg-primary: #0a0e14;
-            --bg-secondary: #111820;
-            --bg-card: #1a2330;
-            --accent: #00d4ff;
-            --accent-glow: rgba(0, 212, 255, 0.3);
-            --text-primary: #ffffff;
-            --text-secondary: #8b9bb4;
-            --border: rgba(0, 212, 255, 0.1);
-        }
+<style>
 
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
 
-        /* ANIMATED BACKGROUND */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
+body{
+background:#070707;
+color:white;
+overflow-x:hidden;
+}
 
-        .bg-grid {
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background-image: 
-                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
-        }
+/* BACKGROUND GRID */
 
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
+body::before{
+content:"";
+position:fixed;
+inset:0;
+background:
+linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),
+linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);
+background-size:60px 60px;
+z-index:-1;
+}
 
-        .floating-particles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
+body::after{
+content:"";
+position:fixed;
+inset:0;
+background:
+radial-gradient(circle at 20% 80%,rgba(0,212,255,0.05),transparent 50%),
+radial-gradient(circle at 80% 20%,rgba(0,212,255,0.05),transparent 50%);
+z-index:-1;
+}
 
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: var(--accent);
-            border-radius: 50%;
-            opacity: 0;
-            animation: float 15s infinite;
-            box-shadow: 0 0 10px var(--accent);
-        }
+/* CONTAINER */
 
-        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
-        .particle:nth-child(2) { left: 30%; animation-delay: 3s; }
-        .particle:nth-child(3) { left: 50%; animation-delay: 6s; }
-        .particle:nth-child(4) { left: 70%; animation-delay: 9s; }
-        .particle:nth-child(5) { left: 90%; animation-delay: 12s; }
+.container{
+max-width:420px;
+margin:auto;
+min-height:100vh;
+display:flex;
+flex-direction:column;
+}
 
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) scale(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) scale(1.5);
-                opacity: 0;
-            }
-        }
+/* BANNER */
 
-        /* MAIN CONTAINER */
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 480px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+.banner{
+width:100%;
+height:200px;
+overflow:hidden;
+position:relative;
+}
 
-        /* BANNER SECTION */
-        .banner-wrapper {
-            position: relative;
-            border-radius: 24px;
-            overflow: hidden;
-            margin-bottom: -60px;
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.5),
-                0 0 0 1px var(--border);
-            animation: bannerGlow 3s ease-in-out infinite alternate;
-        }
+.banner img{
+width:100%;
+height:100%;
+object-fit:cover;
+animation:zoom 20s infinite alternate;
+}
 
-        @keyframes bannerGlow {
-            from { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border); }
-            to { box-shadow: 0 20px 60px rgba(0, 212, 255, 0.1), 0 0 30px var(--accent-glow); }
-        }
+@keyframes zoom{
+from{transform:scale(1)}
+to{transform:scale(1.1)}
+}
 
-        .banner-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            display: block;
-        }
+.banner::after{
+content:"";
+position:absolute;
+inset:0;
+background:linear-gradient(to bottom,transparent, #070707);
+}
 
-        .banner-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 100%;
-            background: linear-gradient(to top, rgba(10, 14, 20, 0.8), transparent);
-        }
+/* PROFILE */
 
-        /* PROFILE SECTION */
-        .profile-section {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 40px;
-        }
+.profile{
+display:flex;
+flex-direction:column;
+align-items:center;
+margin-top:-60px;
+}
 
-        .avatar-wrapper {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            padding: 4px;
-            background: linear-gradient(135deg, var(--accent), #0099cc);
-            animation: avatarPulse 2s ease-in-out infinite;
-            margin-bottom: 20px;
-        }
+.avatar{
+width:120px;
+height:120px;
+border-radius:50%;
+border:4px solid #070707;
+box-shadow:0 0 30px rgba(0,212,255,0.3);
+}
 
-        @keyframes avatarPulse {
-            0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
-            50% { box-shadow: 0 0 30px 10px var(--accent-glow); }
-        }
+.name{
+margin-top:15px;
+font-size:28px;
+font-weight:700;
+background:linear-gradient(90deg,#fff,#00d4ff);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
 
-        .avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--bg-primary);
-            animation: avatarRotate 10s linear infinite;
-        }
+.tag{
+color:#888;
+font-size:13px;
+letter-spacing:2px;
+margin-top:5px;
+}
 
-        @keyframes avatarRotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+/* BUTTON AREA */
 
-        .profile-name {
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--text-primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-            animation: textShine 3s ease-in-out infinite;
-        }
+.menu{
+padding:40px 20px;
+display:flex;
+flex-direction:column;
+gap:18px;
+}
 
-        @keyframes textShine {
-            0%, 100% { filter: brightness(1); }
-            50% { filter: brightness(1.2); }
-        }
+.card{
+background:#151515;
+border-radius:22px;
+padding:22px;
+display:flex;
+align-items:center;
+gap:18px;
+cursor:pointer;
+transition:.35s;
+border:1px solid #222;
+}
 
-        .profile-status {
-            color: var(--text-secondary);
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+.card:hover{
+transform:translateY(-4px);
+border-color:#00d4ff;
+box-shadow:0 15px 40px rgba(0,0,0,.6);
+}
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--accent);
-            border-radius: 50%;
-            animation: statusBlink 2s infinite;
-        }
+.icon{
+width:60px;
+height:60px;
+border-radius:18px;
+background:linear-gradient(135deg,#00d4ff,#00a8cc);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+}
 
-        @keyframes statusBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
+.card-title{
+font-size:18px;
+font-weight:600;
+}
 
-        /* ROLE SELECTION */
-        .role-section {
-            animation: slideUp 0.8s ease-out;
-        }
+.card-desc{
+font-size:13px;
+color:#999;
+}
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+/* PAGE TRANSITION */
 
-        .role-title {
-            text-align: center;
-            font-size: 18px;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-            font-weight: 500;
-        }
+.page{
+position:fixed;
+inset:0;
+background:#070707;
+transform:translateX(100%);
+transition:.5s cubic-bezier(.4,0,.2,1);
+z-index:10;
+}
 
-        .role-buttons {
-            display: flex;
-            gap: 16px;
-        }
+.page.active{
+transform:translateX(0);
+}
 
-        .role-btn {
-            flex: 1;
-            position: relative;
-            padding: 28px 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            overflow: hidden;
-        }
+/* HEADER */
 
-        .role-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
-            transition: left 0.5s;
-        }
+.header{
+padding:18px;
+background:#111;
+border-bottom:1px solid #222;
+display:flex;
+align-items:center;
+gap:10px;
+}
 
-        .role-btn:hover::before {
-            left: 100%;
-        }
+.back{
+width:36px;
+height:36px;
+border-radius:50%;
+background:#1a1a1a;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+}
 
-        .role-btn:hover {
-            transform: translateY(-8px) scale(1.02);
-            border-color: var(--accent);
-            box-shadow: 
-                0 20px 40px rgba(0, 212, 255, 0.2),
-                0 0 0 1px var(--accent);
-        }
+.form{
+padding:30px 20px;
+display:flex;
+flex-direction:column;
+gap:20px;
+}
 
-        .role-btn:active {
-            transform: translateY(-4px) scale(0.98);
-        }
+input,select{
+padding:15px;
+border-radius:12px;
+border:1px solid #333;
+background:#111;
+color:white;
+font-size:15px;
+outline:none;
+}
 
-        .role-icon {
-            font-size: 40px;
-            animation: iconFloat 3s ease-in-out infinite;
-        }
+button{
+padding:16px;
+border:none;
+border-radius:12px;
+background:#00d4ff;
+color:white;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+}
 
-        @keyframes iconFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .role-btn:hover .role-icon {
-            animation: iconSpin 0.5s ease;
-        }
-
-        @keyframes iconSpin {
-            from { transform: rotate(0deg) scale(1); }
-            to { transform: rotate(360deg) scale(1.2); }
-        }
-
-        .role-label {
-            font-size: 16px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .role-desc {
-            font-size: 12px;
-            color: var(--text-secondary);
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s;
-        }
-
-        .role-btn:hover .role-desc {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* LOADING ANIMATION */
-        .loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s, visibility 0.5s;
-        }
-
-        .loader.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loader-ring {
-            width: 80px;
-            height: 80px;
-            border: 4px solid transparent;
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: loaderSpin 1s linear infinite;
-        }
-
-        @keyframes loaderSpin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* GLITCH EFFECT */
-        .glitch {
-            position: relative;
-        }
-
-        .glitch::before,
-        .glitch::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .glitch::before {
-            animation: glitch-1 2s infinite linear alternate-reverse;
-            color: #ff00ff;
-            z-index: -1;
-        }
-
-        .glitch::after {
-            animation: glitch-2 3s infinite linear alternate-reverse;
-            color: #00ffff;
-            z-index: -2;
-        }
-
-        @keyframes glitch-1 {
-            0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-            20% { clip-path: inset(20% 0 30% 0); transform: translate(-2px, 2px); }
-            40% { clip-path: inset(50% 0 20% 0); transform: translate(2px, -2px); }
-            60% { clip-path: inset(10% 0 60% 0); transform: translate(-2px, -2px); }
-            80% { clip-path: inset(80% 0 5% 0); transform: translate(2px, 2px); }
-        }
-
-        @keyframes glitch-2 {
-            0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-            20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -2px); }
-            40% { clip-path: inset(30% 0 40% 0); transform: translate(-2px, 2px); }
-            60% { clip-path: inset(10% 0 80% 0); transform: translate(2px, 2px); }
-            80% { clip-path: inset(40% 0 30% 0); transform: translate(-2px, -2px); }
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 480px) {
-            .container {
-                padding: 16px;
-            }
-            
-            .banner-img {
-                height: 160px;
-            }
-            
-            .avatar-wrapper {
-                width: 100px;
-                height: 100px;
-            }
-            
-            .profile-name {
-                font-size: 24px;
-            }
-        }
-    </style>
+</style>
 </head>
+
 <body>
-    <!-- LOADER -->
-    <div class="loader" id="loader">
-        <div class="loader-ring"></div>
-    </div>
 
-    <!-- BACKGROUND ANIMATION -->
-    <div class="bg-animation">
-        <div class="bg-grid"></div>
-        <div class="floating-particles">
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-        </div>
-    </div>
+<div class="container">
 
-    <!-- MAIN CONTENT -->
-    <div class="container">
-        <!-- BANNER -->
-        <div class="banner-wrapper">
-            <img src="https://res.cloudinary.com/dtdodhqqi/image/upload/v1766772767/IMG-20251128-WA0091_ldbe9l.jpg" alt="Banner" class="banner-img">
-            <div class="banner-overlay"></div>
-        </div>
+<div class="banner">
+<img src="https://res.cloudinary.com/dtdodhqqi/image/upload/v1766772767/IMG-20251128-WA0091_ldbe9l.jpg">
+</div>
 
-        <!-- PROFILE -->
-        <div class="profile-section">
-            <div class="avatar-wrapper">
-                <img src="https://res.cloudinary.com/dtdodhqqi/image/upload/v1766845910/IMG-20251128-WA0094_1_rrrhdn.jpg" alt="Profile" class="avatar">
-            </div>
-            <h1 class="profile-name glitch" data-text="YANZ UTAMA">YANZ UTAMA</h1>
-            <div class="profile-status">
-                <span class="status-dot"></span>
-                <span>Middleman Transaction Service</span>
-            </div>
-        </div>
+<div class="profile">
+<img class="avatar" src="https://res.cloudinary.com/dtdodhqqi/image/upload/v1766845910/IMG-20251128-WA0094_1_rrrhdn.jpg">
+<div class="name">AryanzUtama</div>
+<div class="tag">POWEREDBYARYANZUTAMA</div>
+</div>
 
-        <!-- ROLE SELECTION -->
-        <div class="role-section">
-            <p class="role-title">PILIH PERAN ANDA</p>
-            <div class="role-buttons">
-                <button class="role-btn" onclick="selectRole('buyer')">
-                    <span class="role-icon">🛒</span>
-                    <span class="role-label">BUYER</span>
-                    <span class="role-desc">Masuk dengan kode room</span>
-                </button>
-                <button class="role-btn" onclick="selectRole('seller')">
-                    <span class="role-icon">🏪</span>
-                    <span class="role-label">SELLER</span>
-                    <span class="role-desc">Buat room transaksi</span>
-                </button>
-            </div>
-        </div>
-    </div>
+<div class="menu">
 
-    <script>
-        // SUPABASE CONFIG
-        const SUPABASE_URL = 'https://lmpbrrlhacfriuazrtok.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_ZyOAm9p6EXzOZobH-QNvbQ_7F4imDAF';
-        
-        let supabase;
+<div class="card" onclick="openPage('buyer')">
+<div class="icon">🛒</div>
+<div>
+<div class="card-title">Buyer</div>
+<div class="card-desc">Masuk dengan kode room</div>
+</div>
+</div>
 
-        // INIT
-        window.addEventListener('load', async () => {
-            // Hide loader
-            setTimeout(() => {
-                document.getElementById('loader').classList.add('hidden');
-            }, 1000);
+<div class="card" onclick="openPage('seller')">
+<div class="icon">🏪</div>
+<div>
+<div class="card-title">Seller</div>
+<div class="card-desc">Buat transaksi baru</div>
+</div>
+</div>
 
-            // Init Supabase
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log('Supabase connected!');
-        });
+</div>
 
-        // SELECT ROLE
-        function selectRole(role) {
-            // Add click animation
-            const btn = event.currentTarget;
-            btn.style.transform = 'scale(0.95)';
-            
-            setTimeout(() => {
-                if (role === 'buyer') {
-                    // Next: Show buyer form
-                    alert('Buyer form - coming next step!');
-                } else {
-                    // Next: Show seller form  
-                    alert('Seller form - coming next step!');
-                }
-            }, 200);
-        }
-    </script>
+</div>
+
+<!-- BUYER PAGE -->
+
+<div class="page" id="buyer">
+
+<div class="header">
+<div class="back" onclick="closePage()">←</div>
+Masuk sebagai Buyer
+</div>
+
+<div class="form">
+
+<input placeholder="Nama">
+<input placeholder="Nomor WhatsApp">
+<input placeholder="Kode Room">
+
+<button>Masuk Room</button>
+
+</div>
+
+</div>
+
+<!-- SELLER PAGE -->
+
+<div class="page" id="seller">
+
+<div class="header">
+<div class="back" onclick="closePage()">←</div>
+Buat Transaksi
+</div>
+
+<div class="form">
+
+<input placeholder="Nama">
+<input placeholder="Nomor WhatsApp">
+<input placeholder="Nominal">
+
+<select>
+<option>Include</option>
+<option>Exclude</option>
+</select>
+
+<button>Create Room</button>
+
+</div>
+
+</div>
+
+<script>
+
+function openPage(page){
+document.getElementById(page).classList.add("active")
+}
+
+function closePage(){
+document.querySelectorAll(".page").forEach(p=>{
+p.classList.remove("active")
+})
+}
+
+</script>
+
 </body>
 </html>
