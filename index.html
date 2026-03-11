@@ -1,208 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>MC Chat</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-
-body{
-font-family:Arial;
-background:#111;
-color:white;
-text-align:center;
-}
-
-#chat{display:none}
-
-#messages{
-height:300px;
-overflow:auto;
-border:1px solid #444;
-padding:10px;
-margin-top:10px;
-text-align:left;
-}
-
-input,button{
-padding:10px;
-margin:5px;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Clone Realtime</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial; background: #e6eff5; display: flex; flex-direction: column; height: 100vh; margin: 0; }
+        #chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .message { background: white; padding: 10px; border-radius: 10px; max-width: 70%; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .my-message { align-self: flex-end; background: #dcf8c6; }
+        #input-area { padding: 20px; background: white; display: flex; gap: 10px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; background: #0088cc; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
 </head>
-
 <body>
 
-<h2>MC Chat</h2>
-
-<div id="menu">
-
-<h3>Seller</h3>
-<input id="sellerName" placeholder="Nama Seller">
-<button onclick="createRoom()">Create Room</button>
-
-<hr>
-
-<h3>Buyer</h3>
-<input id="buyerName" placeholder="Nama Buyer">
-<input id="roomInput" placeholder="Room Code">
-<button onclick="joinRoom()">Join Room</button>
-
-</div>
-
-<div id="chat">
-
-<h3 id="roomTitle"></h3>
-
-<div id="messages"></div>
-
-<input id="msg" placeholder="Ketik pesan">
-<button onclick="sendMsg()">Send</button>
-
-</div>
-
-<script>
-
-const { createClient } = supabase
-
-const db = createClient(
-"https://lmpbrrlhacfriuazrtok.supabase.co",
-"sb_publishable_1IojCH_Rna58hbUhTdR6bg_arFswmgw"
-)
-
-let room=""
-let name=""
-
-/* SELLER CREATE ROOM */
-
-async function createRoom(){
-
-name=document.getElementById("sellerName").value
-
-room=Math.floor(100000+Math.random()*900000).toString()
-
-await db.from("rooms").insert({
-room_code:room
-})
-
-alert("Room Code: "+room)
-
-startChat()
-
-}
-
-/* BUYER JOIN ROOM */
-
-async function joinRoom(){
-
-name=document.getElementById("buyerName").value
-room=document.getElementById("roomInput").value
-
-const {data}=await db
-.from("rooms")
-.select("*")
-.eq("room_code",room)
-.single()
-
-if(!data){
-
-alert("Room tidak ditemukan")
-return
-
-}
-
-startChat()
-
-}
-
-/* START CHAT */
-
-function startChat(){
-
-document.getElementById("menu").style.display="none"
-document.getElementById("chat").style.display="block"
-
-document.getElementById("roomTitle").innerText="Room: "+room
-
-loadMessages()
-listen()
-
-}
-
-/* SEND MESSAGE */
-
-async function sendMsg(){
-
-let text=document.getElementById("msg").value
-
-const msgData={
-room:room,
-sender:name,
-message:text
-}
-
-await db.from("messages").insert(msgData)
-
-addMsg(msgData)
-
-document.getElementById("msg").value=""
-
-}
-
-/* LOAD OLD MESSAGES */
-
-async function loadMessages(){
-
-const {data}=await db
-.from("messages")
-.select("*")
-.eq("room",room)
-.order("created_at")
-
-data.forEach(addMsg)
-
-}
-
-/* SHOW MESSAGE */
-
-function addMsg(m){
-
-let div=document.createElement("div")
-
-div.innerText=m.sender+" : "+m.message
-
-document.getElementById("messages").appendChild(div)
-
-}
-
-/* REALTIME LISTENER */
-
-function listen(){
-
-db.channel("chat-"+room)
-
-.on(
-"postgres_changes",
-{
-event:"INSERT",
-schema:"public",
-table:"messages",
-filter:"room=eq."+room
-},
-payload=>{
-
-addMsg(payload.new)
-
-}
-)
-
-.subscribe()
-
-}
-
-</script>
-
+    <div id="chat-box"></div>
+
+    <div id="input-area">
+        <input type="text" id="messageInput" placeholder="Tulis pesan...">
+        <button onclick="sendMessage()">Kirim</button>
+    </div>
+
+    <script>
+        // 1. Inisialisasi Supabase (Ganti dengan punyamu!)
+        const SUPABASE_URL = 'https://lmpbrrlhacfriuazrtok.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_ZyOAm9p6EXzOZobH-QNvbQ_7F4imDAF';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('messageInput');
+        const myName = "User_" + Math.floor(Math.random() * 1000); // Nama dummy
+
+        // 2. Ambil Pesan Lama saat Load
+        async function fetchMessages() {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .order('created_at', { ascending: true });
+            
+            if (data) data.forEach(msg => appendMessage(msg));
+        }
+
+        // 3. Fungsi Tambah Pesan ke UI
+        function appendMessage(msg) {
+            const div = document.createElement('div');
+            div.classList.add('message');
+            if (msg.sender === myName) div.classList.add('my-message');
+            div.innerHTML = `<strong>${msg.sender}</strong>: ${msg.content}`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // 4. Fitur REAL-TIME (Mendengarkan perubahan tabel)
+        supabase
+            .channel('public:messages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                appendMessage(payload.new);
+            })
+            .subscribe();
+
+        // 5. Fungsi Kirim Pesan
+        async function sendMessage() {
+            const text = messageInput.value;
+            if (!text) return;
+
+            const { error } = await supabase
+                .from('messages')
+                .insert([{ content: text, sender: myName }]);
+
+            if (error) console.error("Gagal kirim:", error);
+            messageInput.value = '';
+        }
+
+        fetchMessages();
+    </script>
 </body>
 </html>
