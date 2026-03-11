@@ -2,266 +2,41 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AryanzUtama MC</title>
+<title>MC Room</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-}
-
 body{
-background:#0a0a0a;
-color:white;
-overflow-x:hidden;
-}
-
-/* GRID BACKGROUND */
-
-body::before{
-content:"";
-position:fixed;
-inset:0;
-background:
-linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),
-linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);
-background-size:60px 60px;
-z-index:-2;
-}
-
-/* CONTAINER */
-
-.container{
-max-width:420px;
-margin:auto;
-position:relative;
-min-height:100vh;
-}
-
-/* BANNER */
-
-.banner{
-height:200px;
-overflow:hidden;
-position:relative;
-z-index:0;
-}
-
-.banner img{
-width:100%;
-height:100%;
-object-fit:cover;
-animation:zoom 20s infinite alternate;
-}
-
-@keyframes zoom{
-from{transform:scale(1)}
-to{transform:scale(1.1)}
-}
-
-.banner::after{
-content:"";
-position:absolute;
-inset:0;
-background:linear-gradient(to bottom,transparent,#0a0a0a);
-}
-
-/* PROFILE */
-
-.profile{
-display:flex;
-flex-direction:column;
-align-items:center;
-margin-top:-60px;
-position:relative;
-z-index:2;
-}
-
-.avatarWrap{
-padding:5px;
-border-radius:50%;
-background:linear-gradient(135deg,#00d4ff,transparent);
-}
-
-.avatar{
-width:120px;
-height:120px;
-border-radius:50%;
-border:4px solid #0a0a0a;
-}
-
-.name{
-font-size:28px;
-font-weight:700;
-margin-top:15px;
-background:linear-gradient(90deg,#fff,#00d4ff);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-}
-
-.tag{
-font-size:12px;
-letter-spacing:2px;
-color:#888;
-margin-top:6px;
-}
-
-/* MENU */
-
-.roles{
-padding:40px 20px;
-display:flex;
-flex-direction:column;
-gap:18px;
-}
-
-.role{
-background:#141414;
-border-radius:20px;
-padding:22px;
-display:flex;
-align-items:center;
-gap:18px;
-border:1px solid #222;
-cursor:pointer;
-transition:.35s;
-}
-
-.role:hover{
-transform:translateY(-5px);
-border-color:#00d4ff;
-box-shadow:0 20px 40px rgba(0,0,0,.6);
-}
-
-.roleIcon{
-width:55px;
-height:55px;
-border-radius:16px;
-background:linear-gradient(135deg,#00d4ff,#0099cc);
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:26px;
-}
-
-.roleTitle{
-font-size:18px;
-font-weight:600;
-}
-
-.roleDesc{
-font-size:13px;
-color:#999;
-}
-
-/* PAGE */
-
-.page{
-position:fixed;
-inset:0;
-background:#0a0a0a;
-transform:translateX(100%);
-transition:.45s cubic-bezier(.4,0,.2,1);
-z-index:10;
-}
-
-.page.active{
-transform:translateX(0);
-}
-
-/* HEADER */
-
-.header{
-padding:18px;
-background:#111;
-border-bottom:1px solid #222;
-display:flex;
-align-items:center;
-gap:12px;
-}
-
-.back{
-width:36px;
-height:36px;
-border-radius:50%;
-background:#1a1a1a;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-}
-
-/* FORM */
-
-.form{
-padding:30px 20px;
-display:flex;
-flex-direction:column;
-gap:18px;
-animation:fadeUp .45s;
-}
-
-@keyframes fadeUp{
-from{opacity:0;transform:translateY(25px)}
-to{opacity:1;transform:translateY(0)}
-}
-
-input,select{
-padding:16px;
-border-radius:14px;
-border:1px solid #333;
+font-family:Arial;
 background:#0f0f0f;
 color:white;
-font-size:15px;
-outline:none;
+text-align:center;
+padding:40px;
 }
 
-input:focus,select:focus{
-border-color:#00d4ff;
-box-shadow:0 0 0 3px rgba(0,212,255,.15);
+.box{
+background:#1b1b1b;
+padding:25px;
+border-radius:10px;
+max-width:400px;
+margin:auto;
+margin-bottom:30px;
+}
+
+input,select,button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:6px;
+border:none;
 }
 
 button{
-padding:16px;
-border-radius:14px;
-border:none;
-background:#00d4ff;
+background:#00bfff;
 color:white;
-font-weight:600;
 cursor:pointer;
-}
-
-/* ROOM CODE */
-
-.codeBox{
-background:linear-gradient(135deg,#00d4ff,#0099cc);
-padding:28px;
-border-radius:16px;
-text-align:center;
-display:none;
-}
-
-.codeNumber{
-font-size:32px;
-letter-spacing:6px;
-font-weight:700;
-margin:10px 0;
-}
-
-.copyBtn{
-margin-top:10px;
-background:rgba(255,255,255,.2);
-border:1px solid rgba(255,255,255,.3);
-}
-
-.enterBtn{
-margin-top:12px;
-background:#0a0a0a;
-border:1px solid white;
 }
 
 </style>
@@ -269,150 +44,114 @@ border:1px solid white;
 
 <body>
 
-<div class="container">
+<h1>MC Room</h1>
 
-<div class="banner">
-<img src="https://res.cloudinary.com/dtdodhqqi/image/upload/v1766772767/IMG-20251128-WA0091_ldbe9l.jpg">
-</div>
+<div class="box">
 
-<div class="profile">
-<div class="avatarWrap">
-<img class="avatar" src="https://res.cloudinary.com/dtdodhqqi/image/upload/v1766845910/IMG-20251128-WA0094_1_rrrhdn.jpg">
-</div>
+<h2>Seller</h2>
 
-<div class="name">AryanzUtama</div>
-<div class="tag">POWEREDBYARYANZUTAMA</div>
-</div>
+<input id="sellerName" placeholder="Nama">
 
-<div class="roles">
-
-<div class="role" onclick="openPage('buyer')">
-<div class="roleIcon">🛒</div>
-<div>
-<div class="roleTitle">Buyer</div>
-<div class="roleDesc">Masuk dengan kode room</div>
-</div>
-</div>
-
-<div class="role" onclick="openPage('seller')">
-<div class="roleIcon">🏪</div>
-<div>
-<div class="roleTitle">Seller</div>
-<div class="roleDesc">Buat transaksi baru</div>
-</div>
-</div>
-
-</div>
-
-</div>
-
-<!-- BUYER -->
-
-<div class="page" id="buyer">
-
-<div class="header">
-<div class="back" onclick="closePage()">←</div>
-Buyer
-</div>
-
-<div class="form">
-
-<input placeholder="Nama">
-
-<input placeholder="Nomor WhatsApp (08xxxxxxxxxx)">
-
-<input placeholder="Kode Room">
-
-<button>Masuk Room</button>
-
-</div>
-
-</div>
-
-<!-- SELLER -->
-
-<div class="page" id="seller">
-
-<div class="header">
-<div class="back" onclick="closePage()">←</div>
-Seller
-</div>
-
-<div class="form">
-
-<input placeholder="Nama">
-
-<input placeholder="Nomor WhatsApp (08xxxxxxxxxx)">
+<input id="sellerWA" placeholder="WhatsApp 08xxxx">
 
 <input id="nominal" placeholder="Nominal">
 
-<select>
-<option>Inc</option>
-<option>Exc</option>
+<select id="trxType">
+<option value="inc">Inc</option>
+<option value="exc">Exc</option>
 </select>
 
 <button onclick="createRoom()">Create Room</button>
 
-<div class="codeBox" id="roomBox">
+</div>
 
-<div>Kode Room</div>
 
-<div class="codeNumber" id="roomCode"></div>
+<div class="box">
 
-<button class="copyBtn" onclick="copyCode()">Salin</button>
+<h2>Buyer</h2>
 
-<button class="enterBtn">Masuk Room</button>
+<input id="buyerName" placeholder="Nama">
+
+<input id="buyerWA" placeholder="WhatsApp">
+
+<input id="roomCode" placeholder="Room Code">
+
+<button onclick="joinRoom()">Join Room</button>
 
 </div>
 
-</div>
-
-</div>
 
 <script>
 
-function openPage(id){
-document.getElementById(id).classList.add("active")
+const SUPABASE_URL="https://lmpbrrlhacfriuazrtok.supabase.co"
+
+const SUPABASE_KEY="sb_publishable_ZyOAm9p6EXzOZobH-QNvbQ_7F4imDAF"
+
+const supabase = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
+
+
+// CREATE ROOM
+
+async function createRoom(){
+
+const code = Math.floor(100000+Math.random()*900000).toString()
+
+const sellerName=document.getElementById("sellerName").value
+const sellerWA=document.getElementById("sellerWA").value
+const nominal=document.getElementById("nominal").value
+const trxType=document.getElementById("trxType").value
+
+await supabase.from("rooms").insert([
+
+{
+room_code:code,
+seller_name:sellerName,
+seller_wa:sellerWA,
+nominal:nominal,
+trx_type:trxType
 }
 
-function closePage(){
-document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"))
+])
+
+window.location.href="room.html?code="+code+"&name="+sellerName
+
 }
 
-/* FORMAT RUPIAH */
 
-document.getElementById("nominal").addEventListener("input",function(e){
+// JOIN ROOM
 
-let number=e.target.value.replace(/\D/g,"")
+async function joinRoom(){
 
-if(!number){
-e.target.value=""
+const code=document.getElementById("roomCode").value
+const name=document.getElementById("buyerName").value
+const wa=document.getElementById("buyerWA").value
+
+const {data}=await supabase
+.from("rooms")
+.select("*")
+.eq("room_code",code)
+.single()
+
+if(!data){
+
+alert("Room tidak ditemukan")
+
 return
-}
-
-number=parseInt(number)
-
-e.target.value="Rp"+number.toLocaleString("id-ID")
-
-})
-
-function createRoom(){
-
-let code=Math.floor(100000+Math.random()*900000)
-
-document.getElementById("roomCode").innerText=code
-
-document.getElementById("roomBox").style.display="block"
 
 }
 
-function copyCode(){
+await supabase.from("participants").insert([
 
-let text=document.getElementById("roomCode").innerText
+{
+room_code:code,
+name:name,
+role:"buyer",
+wa:wa
+}
 
-navigator.clipboard.writeText(text)
+])
 
-alert("Code berhasil disalin")
+window.location.href="room.html?code="+code+"&name="+name
 
 }
 
