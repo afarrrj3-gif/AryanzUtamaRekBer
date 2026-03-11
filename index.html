@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <title>MC Chat</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -15,9 +13,7 @@ color:white;
 text-align:center;
 }
 
-#chat{
-display:none;
-}
+#chat{display:none}
 
 #messages{
 height:300px;
@@ -39,28 +35,22 @@ margin:5px;
 
 <body>
 
-<h2>MC Chat System</h2>
+<h2>MC Chat</h2>
 
 <div id="menu">
 
 <h3>Seller</h3>
-
 <input id="sellerName" placeholder="Nama Seller">
-
 <button onclick="createRoom()">Create Room</button>
 
 <hr>
 
 <h3>Buyer</h3>
-
 <input id="buyerName" placeholder="Nama Buyer">
-
 <input id="roomInput" placeholder="Room Code">
-
 <button onclick="joinRoom()">Join Room</button>
 
 </div>
-
 
 <div id="chat">
 
@@ -69,11 +59,9 @@ margin:5px;
 <div id="messages"></div>
 
 <input id="msg" placeholder="Ketik pesan">
-
 <button onclick="sendMsg()">Send</button>
 
 </div>
-
 
 <script>
 
@@ -87,11 +75,17 @@ const db = createClient(
 let room=""
 let name=""
 
-function createRoom(){
+/* SELLER CREATE ROOM */
+
+async function createRoom(){
 
 name=document.getElementById("sellerName").value
 
 room=Math.floor(100000+Math.random()*900000).toString()
+
+await db.from("rooms").insert({
+room_code:room
+})
 
 alert("Room Code: "+room)
 
@@ -99,61 +93,79 @@ startChat()
 
 }
 
-function joinRoom(){
+/* BUYER JOIN ROOM */
+
+async function joinRoom(){
 
 name=document.getElementById("buyerName").value
-
 room=document.getElementById("roomInput").value
+
+const {data}=await db
+.from("rooms")
+.select("*")
+.eq("room_code",room)
+.single()
+
+if(!data){
+
+alert("Room tidak ditemukan")
+return
+
+}
 
 startChat()
 
 }
 
+/* START CHAT */
+
 function startChat(){
 
 document.getElementById("menu").style.display="none"
-
 document.getElementById("chat").style.display="block"
 
 document.getElementById("roomTitle").innerText="Room: "+room
 
 loadMessages()
-
 listen()
 
 }
+
+/* SEND MESSAGE */
 
 async function sendMsg(){
 
 let text=document.getElementById("msg").value
 
-await db.from("messages").insert({
-
+const msgData={
 room:room,
 sender:name,
 message:text
+}
 
-})
+await db.from("messages").insert(msgData)
+
+addMsg(msgData)
 
 document.getElementById("msg").value=""
 
 }
 
+/* LOAD OLD MESSAGES */
+
 async function loadMessages(){
 
 const {data}=await db
-
 .from("messages")
-
 .select("*")
-
 .eq("room",room)
-
 .order("created_at")
 
 data.forEach(addMsg)
 
 }
+
+/* SHOW MESSAGE */
 
 function addMsg(m){
 
@@ -164,6 +176,8 @@ div.innerText=m.sender+" : "+m.message
 document.getElementById("messages").appendChild(div)
 
 }
+
+/* REALTIME LISTENER */
 
 function listen(){
 
